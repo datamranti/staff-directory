@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="theme-color" content="#0000ff" />
+  <title>MRANTI Staff Directory</title>
+  <link rel="icon" type="image/png" sizes="512x512" href="./public/favicon-512.png?v=1" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32.png?v=1" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16.png?v=1" />
+  <link rel="shortcut icon" href="./public/favicon.ico?v=1" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png?v=1" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="./src/styles.css" />
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+</head>
+<body>
+  <div id="loginScreen" class="login-screen" aria-hidden="false">
+    <div class="login-orb login-orb-one"></div>
+    <div class="login-orb login-orb-two"></div>
+    <main class="login-card">
+      <div class="login-brand-row">
+        <img class="mranti-logo login-logo" src="https://cdn.prod.website-files.com/6719e3902a71ea8154ba371d/6996a2c470a01e3f32ffa080_M30.png" alt="MRANTI 30 Years" />
+        <span class="brand-divider"></span>
+        <span class="directory-mark" aria-hidden="true">
+          <svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg>
+        </span>
+      </div>
+      <div class="login-kicker">MRANTI INTERNAL WORKSPACE</div>
+      <h1>Staff Directory</h1>
+      <p class="login-copy">Find the right colleague, role and contact details across MRANTI.</p>
+      <button id="signInButton" class="primary-button sign-in-button" type="button">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M21.35 11.1h-9.18v2.98h5.29c-.23 1.53-1.76 4.49-5.29 4.49-3.19 0-5.79-2.64-5.79-5.89s2.6-5.89 5.79-5.89c1.82 0 3.03.78 3.73 1.45l2.55-2.49C16.82 4.2 14.7 3.25 12.17 3.25 7.09 3.25 3 7.44 3 12.68s4.09 9.43 9.17 9.43c5.29 0 8.8-3.81 8.8-9.17 0-.62-.07-1.21-.15-1.84z"></path></svg>
+        Continue with Google
+      </button>
+      <div id="loginError" class="login-error" role="alert"></div>
+      <div class="login-trust"><span></span>Available to authenticated @mranti.my accounts only.</div>
+    </main>
+  </div>
+
+  <div id="appScreen" class="app-screen" hidden>
+    <header class="topbar">
+      <div class="topbar-inner">
+        <div class="brand-group">
+          <img class="mranti-logo" src="https://cdn.prod.website-files.com/6719e3902a71ea8154ba371d/6996a2c470a01e3f32ffa080_M30.png" alt="MRANTI 30 Years" />
+          <span class="brand-divider"></span>
+          <div class="product-brand">
+            <span class="product-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M22 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg></span>
+            <span>Staff Directory</span>
+          </div>
+        </div>
+        <div class="user-area">
+          <button id="refreshButton" class="icon-button" type="button" title="Refresh directory" aria-label="Refresh directory">
+            <svg viewBox="0 0 24 24"><path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 4v5h5"></path><path d="M4 13a8.1 8.1 0 0 0 15.5 2M20 20v-5h-5"></path></svg>
+          </button>
+          <button id="userButton" class="user-button" type="button" aria-expanded="false">
+            <img id="userPhoto" class="user-photo" alt="" />
+            <span id="userInitial" class="user-initial"></span>
+            <span class="user-copy"><strong id="userName"></strong><small id="userEmail"></small></span>
+            <svg class="chevron" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"></path></svg>
+          </button>
+          <div id="userMenu" class="user-menu" hidden>
+            <div class="user-menu-head"><strong id="menuName"></strong><span id="menuEmail"></span></div>
+            <button id="signOutButton" type="button">Sign out</button>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main class="page-shell">
+      <section class="hero">
+        <div>
+          <div class="eyebrow">MRANTI PEOPLE DIRECTORY</div>
+          <h1>Find the right person, faster.</h1>
+          <p>Search MRANTI colleagues by name, role, department, organisation unit, email or phone.</p>
+        </div>
+        <div class="hero-meta" aria-label="Directory summary">
+          <div class="meta-pill"><strong id="activeCount">—</strong><span>Active staff</span></div>
+          <div class="meta-pill"><strong id="departmentCount">—</strong><span>Departments</span></div>
+        </div>
+      </section>
+
+      <section class="directory-toolbar" aria-label="Directory controls">
+        <label class="search-control">
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          <input id="searchInput" type="search" autocomplete="off" placeholder="Search name, role, department, email or phone…" />
+          <kbd>/</kbd>
+        </label>
+        <label class="select-control">
+          <span>Department</span>
+          <select id="departmentFilter"><option value="">All departments</option></select>
+        </label>
+        <label class="select-control location-control">
+          <span>Location</span>
+          <select id="locationFilter"><option value="">All locations</option></select>
+        </label>
+        <label class="select-control sort-control">
+          <span>Sort</span>
+          <select id="sortSelect">
+            <option value="name">Name A–Z</option>
+            <option value="department">Department</option>
+            <option value="title">Job title</option>
+          </select>
+        </label>
+        <div class="view-toggle" role="group" aria-label="Directory view">
+          <button id="gridViewButton" class="view-button active" type="button" aria-label="Grid view"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg></button>
+          <button id="listViewButton" class="view-button" type="button" aria-label="List view"><svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"></path><path d="M3 6h.01M3 12h.01M3 18h.01"></path></svg></button>
+        </div>
+      </section>
+
+      <section class="directory-panel">
+        <div class="panel-head">
+          <div><span class="panel-label">STAFF MEMBERS</span><span id="resultCount" class="result-count"></span></div>
+          <button id="clearFiltersButton" class="text-button" type="button">Clear filters</button>
+        </div>
+
+        <div id="statusBanner" class="status-banner" hidden></div>
+        <div id="skeletonGrid" class="staff-grid skeleton-grid" aria-hidden="true"></div>
+        <div id="staffGrid" class="staff-grid"></div>
+        <div id="emptyState" class="empty-state" hidden>
+          <span class="empty-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg></span>
+          <h2>No staff found</h2>
+          <p>Try another name, role, department or location.</p>
+          <button id="emptyClearButton" class="secondary-button" type="button">Clear filters</button>
+        </div>
+      </section>
+    </main>
+
+    <div id="drawerBackdrop" class="drawer-backdrop" hidden></div>
+    <aside id="staffDrawer" class="staff-drawer" aria-hidden="true" aria-label="Staff profile">
+      <div class="drawer-head">
+        <span class="drawer-eyebrow">STAFF PROFILE</span>
+        <button id="closeDrawerButton" class="icon-button" type="button" aria-label="Close profile"><svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"></path></svg></button>
+      </div>
+      <div id="drawerContent"></div>
+    </aside>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  </div>
+
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>

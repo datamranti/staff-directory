@@ -1,0 +1,284 @@
+{
+  "name": "MRANTI Staff Directory API",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "staff-directory-data",
+        "responseMode": "responseNode",
+        "options": {}
+      },
+      "id": "cd410a81-ff91-423e-a9aa-2e490d5c519f",
+      "name": "Staff Directory Data Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [
+        0,
+        0
+      ],
+      "webhookId": "staff-directory-data"
+    },
+    {
+      "parameters": {
+        "jsCode": "function parseBody(value) {\n  if (value && typeof value === 'object') return value;\n  if (typeof value === 'string' && value.trim()) {\n    try { return JSON.parse(value); } catch (error) { return {}; }\n  }\n  return {};\n}\nconst body = parseBody($json.body);\nconst idToken = String(body.idToken || '').trim();\nif (!idToken) return [{ json: { authorized: 'no', success: false, error: 'Authentication token is missing.' } }];\ntry {\n  const lookup = await this.helpers.httpRequest({\n    method: 'POST',\n    url: 'https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=AIzaSyDXz0gL67r9BafTg8nL6VdHYdw1tfcxhto',\n    headers: { 'Content-Type': 'application/json' },\n    body: { idToken },\n    json: true\n  });\n  const user = Array.isArray(lookup?.users) ? lookup.users[0] : null;\n  const email = String(user?.email || '').trim().toLowerCase();\n  if (!email || !email.endsWith('@mranti.my')) {\n    return [{ json: { authorized: 'no', success: false, error: 'Only authenticated @mranti.my users may access the Staff Directory.' } }];\n  }\n  return [{ json: { authorized: 'yes', success: true, userEmail: email } }];\n} catch (error) {\n  return [{ json: { authorized: 'no', success: false, error: 'Your Staff Directory session could not be verified. Please sign in again.' } }];\n}"
+      },
+      "id": "fb312f3c-ffcb-41f9-bcd4-4e1c9222d878",
+      "name": "Authorize Staff Directory",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 2
+          },
+          "conditions": [
+            {
+              "id": "ea4d3197-d6b4-485d-a48e-6ac81a2b0644",
+              "leftValue": "={{ $json.authorized }}",
+              "rightValue": "yes",
+              "operator": {
+                "type": "string",
+                "operation": "equals"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "id": "292991ef-d494-4b47-968a-030b66d00786",
+      "name": "Check Staff Directory Authorization",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.2,
+      "position": [
+        480,
+        0
+      ]
+    },
+    {
+      "parameters": {
+        "url": "https://admin.googleapis.com/admin/directory/v1/users",
+        "authentication": "genericCredentialType",
+        "genericAuthType": "oAuth2Api",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "customer",
+              "value": "my_customer"
+            },
+            {
+              "name": "maxResults",
+              "value": "500"
+            },
+            {
+              "name": "orderBy",
+              "value": "email"
+            },
+            {
+              "name": "projection",
+              "value": "full"
+            },
+            {
+              "name": "showDeleted",
+              "value": "false"
+            }
+          ]
+        },
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "Accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "options": {
+          "response": {
+            "response": {
+              "responseFormat": "json"
+            }
+          },
+          "timeout": 60000
+        }
+      },
+      "id": "f56cd141-41d0-45c5-b1c9-bc250b0f068f",
+      "name": "Get Google Workspace Users",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [
+        720,
+        -100
+      ],
+      "credentials": {
+        "oAuth2Api": {
+          "id": "agb21p9odUyVryQk",
+          "name": "Unnamed credential"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const payload = $json || {};\nconst sourceUsers = Array.isArray(payload.users) ? payload.users : [];\nfunction text(value) { return value === null || value === undefined ? '' : String(value).trim(); }\nfunction firstOrganisation(user) { return Array.isArray(user.organizations) ? (user.organizations[0] || {}) : {}; }\nfunction joined(values, field = 'value') {\n  if (!Array.isArray(values)) return '';\n  return values.map(item => typeof item === 'string' ? text(item) : text(item?.[field])).filter(Boolean).join(', ');\n}\nconst users = sourceUsers\n  .filter(user => user.includeInGlobalAddressList !== false && !user.suspended && !user.archived)\n  .map(user => {\n    const name = user.name || {};\n    const organisation = firstOrganisation(user);\n    const fullName = text(name.fullName) || text(name.displayName) || text(user.primaryEmail);\n    return {\n      id: text(user.id),\n      fullName,\n      givenName: text(name.givenName),\n      familyName: text(name.familyName),\n      primaryEmail: text(user.primaryEmail),\n      jobTitle: text(organisation.title),\n      department: text(organisation.department),\n      organisationName: text(organisation.name),\n      organisationUnit: text(user.orgUnitPath),\n      location: text(organisation.location),\n      phoneNumbers: joined(user.phones),\n      aliases: joined(user.aliases, 'unused'),\n      additionalEmails: joined(user.emails, 'address')\n    };\n  })\n  .map(user => ({ ...user, aliases: Array.isArray(sourceUsers.find(raw => String(raw.id) === user.id)?.aliases) ? sourceUsers.find(raw => String(raw.id) === user.id).aliases.map(text).filter(Boolean).join(', ') : '' }))\n  .sort((a,b) => a.fullName.localeCompare(b.fullName, 'en', { sensitivity: 'base' }));\nconst departments = [...new Set(users.map(user => user.department).filter(Boolean))].sort((a,b)=>a.localeCompare(b));\nconst locations = [...new Set(users.map(user => user.location).filter(Boolean))].sort((a,b)=>a.localeCompare(b));\nreturn [{ json: { success: true, totalUsers: users.length, departments, locations, generatedAt: new Date().toISOString(), users } }];"
+      },
+      "id": "4200d961-ee61-4a5e-9d7c-038954291212",
+      "name": "Format Staff Directory Data",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        960,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 200,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json; charset=utf-8"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-store"
+              }
+            ]
+          }
+        }
+      },
+      "id": "a2a1f284-001a-47e4-b161-05202116c870",
+      "name": "Respond Staff Directory Data",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        1200,
+        -100
+      ]
+    },
+    {
+      "parameters": {
+        "respondWith": "text",
+        "responseBody": "={{ JSON.stringify($json) }}",
+        "options": {
+          "responseCode": 401,
+          "responseHeaders": {
+            "entries": [
+              {
+                "name": "Content-Type",
+                "value": "application/json; charset=utf-8"
+              },
+              {
+                "name": "Access-Control-Allow-Origin",
+                "value": "*"
+              },
+              {
+                "name": "Cache-Control",
+                "value": "no-store"
+              }
+            ]
+          }
+        }
+      },
+      "id": "7e856190-6a21-41b7-bc9f-99fad1e2c853",
+      "name": "Respond Staff Directory Unauthorized",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1.4,
+      "position": [
+        720,
+        120
+      ]
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Staff Directory Data Webhook": {
+      "main": [
+        [
+          {
+            "node": "Authorize Staff Directory",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Authorize Staff Directory": {
+      "main": [
+        [
+          {
+            "node": "Check Staff Directory Authorization",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Check Staff Directory Authorization": {
+      "main": [
+        [
+          {
+            "node": "Get Google Workspace Users",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Respond Staff Directory Unauthorized",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get Google Workspace Users": {
+      "main": [
+        [
+          {
+            "node": "Format Staff Directory Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Format Staff Directory Data": {
+      "main": [
+        [
+          {
+            "node": "Respond Staff Directory Data",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "7966a7b9-0ea3-4754-b76a-d8043ec2b37b",
+  "meta": {
+    "templateCredsSetupCompleted": true
+  },
+  "tags": []
+}
