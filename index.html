@@ -6,11 +6,11 @@
   <meta name="theme-color" content="#f5f9ff" />
   <title>MRANTI Staff Directory</title>
 
-  <link rel="icon" type="image/png" sizes="512x512" href="./public/favicon-512.png?v=15" />
-  <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32.png?v=15" />
-  <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16.png?v=15" />
-  <link rel="shortcut icon" href="./public/favicon.ico?v=15" />
-  <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png?v=15" />
+  <link rel="icon" type="image/png" sizes="512x512" href="./public/favicon-512.png?v=17" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32.png?v=17" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16.png?v=17" />
+  <link rel="shortcut icon" href="./public/favicon.ico?v=17" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png?v=17" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -494,7 +494,9 @@
 
     .filter-dropdown{
       position:relative;
+      width:100%;
       min-width:0;
+      max-width:100%;
       z-index:1;
     }
     .filter-dropdown.open{
@@ -502,6 +504,8 @@
     }
     .filter-trigger{
       width:100%;
+      min-width:0;
+      max-width:100%;
       min-height:46px;
       padding:7px 11px 6px;
       display:flex;
@@ -546,6 +550,7 @@
       width:15px;
       height:15px;
       flex:0 0 15px;
+      margin-left:auto;
       color:#53627a;
       transition:transform .16s ease;
     }
@@ -746,70 +751,256 @@
     .empty{padding:70px 20px;text-align:center;color:#64748b;font-size:10px}
     .empty h2{margin:0 0 5px;color:#0f172a;font-size:14px}
 
-    /* PROFILE DRAWER: above navbar */
+    /* PROFILE DRAWER — compact CRM details panel */
     .backdrop{
-      position:fixed;inset:0;z-index:1000;
-      background:rgba(15,23,42,.18);backdrop-filter:blur(2px)
+      position:fixed;
+      inset:0;
+      z-index:1000;
+      background:rgba(15,23,42,.12);
+      backdrop-filter:blur(1.5px);
     }
+
     .drawer{
-      position:fixed;top:0;right:0;z-index:1010;
-      width:min(420px,92vw);height:100vh;overflow-y:auto;
+      position:fixed;
+      top:0;
+      right:0;
+      z-index:1010;
+      width:min(460px,94vw);
+      height:100dvh;
+      overflow:hidden;
       transform:translateX(105%);
-      background:#fff;border-left:1px solid #dbeafe;
-      box-shadow:-18px 0 50px rgba(15,23,42,.11);
-      transition:transform .2s ease
+      background:#fff;
+      border-left:1px solid #dbeafe;
+      box-shadow:-20px 0 55px rgba(15,23,42,.12);
+      transition:transform .2s ease;
     }
+
     .drawer.open{transform:translateX(0)}
+
     .drawer-head{
-      position:sticky;top:0;z-index:5;
-      min-height:62px;padding:12px 16px;
-      display:flex;align-items:center;justify-content:space-between;
-      border-bottom:1px solid #e8eef7;background:#fff
+      position:absolute;
+      top:0;
+      left:0;
+      right:0;
+      z-index:5;
+      height:62px;
+      padding:0 18px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      border-bottom:1px solid #e8eef7;
+      background:#fff;
     }
-    .drawer-head span{color:#2563eb;font-size:9px;font-weight:800;letter-spacing:1.4px}
+
+    .drawer-head span{
+      color:#64748b;
+      font-size:9px;
+      line-height:1;
+      font-weight:500;
+      letter-spacing:1.5px;
+      text-transform:uppercase;
+    }
+
     .close{
-      width:38px;height:38px;display:grid;place-items:center;
-      border:1px solid #dbeafe;border-radius:11px;
-      color:#5d6f8a;background:#fff
+      width:36px;
+      height:36px;
+      display:grid;
+      place-items:center;
+      border:1px solid #dbeafe;
+      border-radius:10px;
+      color:#64748b;
+      background:#fff;
     }
-    .close:hover{color:#2563eb;background:#f8fbff}
-    .close svg{width:17px;height:17px}
-    .drawer-body{display:block!important;min-height:0!important;padding:0 20px 24px!important}
-    .drawer-profile{min-height:0!important;margin:0!important;padding:20px 2px 22px!important;text-align:center;border-bottom:1px solid #e8eef7}
+
+    .close:hover{
+      color:#2563eb;
+      background:#f8fbff;
+      border-color:#bfdbfe;
+    }
+
+    .close svg{width:16px;height:16px}
+
+    /* Force the profile content to begin immediately below the header.
+       This removes the large empty gap regardless of inherited layout. */
+    .drawer-body{
+      position:absolute!important;
+      top:62px!important;
+      right:0!important;
+      bottom:0!important;
+      left:0!important;
+      display:block!important;
+      min-height:0!important;
+      margin:0!important;
+      padding:0 22px 24px!important;
+      overflow-y:auto!important;
+      background:#fff;
+    }
+
+    .drawer-profile{
+      width:100%;
+      min-height:0!important;
+      margin:0!important;
+      padding:22px 0 20px!important;
+      display:grid!important;
+      grid-template-columns:68px minmax(0,1fr)!important;
+      grid-template-areas:
+        "avatar identity"
+        "avatar chips";
+      column-gap:15px;
+      row-gap:7px;
+      align-items:center!important;
+      text-align:left!important;
+      border-bottom:1px solid #e8eef7;
+    }
+
     .drawer-avatar{
-      width:76px;height:76px;margin:0 auto 14px;
-      position:relative;overflow:hidden;
-      border:1px solid #bfd7fb;border-radius:21px;background:#edf4ff
+      grid-area:avatar;
+      width:68px;
+      height:68px;
+      margin:0!important;
+      position:relative;
+      overflow:hidden;
+      border:1px solid #bfdbfe;
+      border-radius:18px;
+      background:#edf4ff;
     }
-    .drawer-avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0}.drawer-avatar.has-photo img{opacity:1}
+
+    .drawer-avatar img{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      opacity:0;
+    }
+
+    .drawer-avatar.has-photo img{opacity:1}
+
     .drawer-avatar .drawer-avatar-fallback{
       position:absolute;
       inset:0;
       display:grid;
       place-items:center;
       color:#8ea3c1;
-      background:linear-gradient(180deg,#f5f9ff,#edf4ff);
+      background:linear-gradient(180deg,#f7faff,#edf4ff);
     }
-    .drawer-avatar .drawer-avatar-fallback svg{width:32px;height:32px;stroke-width:1.65}
+
+    .drawer-avatar .drawer-avatar-fallback svg{
+      width:29px;
+      height:29px;
+      stroke-width:1.65;
+    }
+
     .drawer-avatar.has-photo .drawer-avatar-fallback{display:none}
-    .drawer-profile h2{margin:0;color:#0f172a;font-size:18px;line-height:1.4;letter-spacing:-.35px}
-    .drawer-profile p{margin:4px 0 9px;color:#64748b;font-size:9px}
-    .drawer-chips{display:flex;justify-content:center;gap:5px;flex-wrap:wrap}
-    .details{padding:16px 0}
+
+    .drawer-identity{
+      grid-area:identity;
+      min-width:0;
+      align-self:end;
+    }
+
+    .drawer-profile h2{
+      margin:0;
+      color:#0f172a;
+      font-size:16px;
+      line-height:1.3;
+      font-weight:750;
+      letter-spacing:-.25px;
+    }
+
+    .drawer-profile p{
+      margin:5px 0 0;
+      color:#64748b;
+      font-size:9px;
+      line-height:1.45;
+    }
+
+    .drawer-chips{
+      grid-area:chips;
+      display:flex;
+      justify-content:flex-start;
+      align-items:flex-start;
+      gap:5px;
+      flex-wrap:wrap;
+      align-self:start;
+    }
+
+    .details{
+      padding:14px 0 0;
+    }
+
     .detail{
-      padding:9px 2px;display:grid;grid-template-columns:105px 1fr;gap:12px;
-      border-bottom:1px solid #f0f4f8
+      min-height:42px;
+      padding:10px 0;
+      display:grid;
+      grid-template-columns:118px minmax(0,1fr);
+      align-items:start;
+      gap:14px;
+      border-bottom:1px solid #edf2f7;
     }
-    .detail span{color:#94a3b8;font-size:8px;font-weight:600}
-    .detail strong{min-width:0;color:#334155;font-size:8.7px;font-weight:650;word-break:break-word}
-    .detail a{color:#2563eb;text-decoration:none}
-    .drawer-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
-    .drawer-actions a,.drawer-actions button{
-      min-height:41px;display:flex;align-items:center;justify-content:center;
-      border-radius:11px;text-decoration:none;font-size:8.5px;font-weight:700
+
+    .detail span{
+      color:#94a3b8;
+      font-size:8px;
+      line-height:1.45;
+      font-weight:600;
     }
-    .primary{border:0;color:#fff;background:#2563eb}
-    .secondary{border:1px solid #bcd4fa;color:#2563eb;background:#fff}
+
+    .detail strong{
+      min-width:0;
+      color:#334155;
+      font-size:9px;
+      line-height:1.45;
+      font-weight:650;
+      word-break:break-word;
+    }
+
+    .detail a{
+      color:#2563eb;
+      text-decoration:none;
+    }
+
+    .drawer-actions{
+      position:sticky;
+      bottom:-24px;
+      margin:16px -22px -24px;
+      padding:14px 22px 18px;
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:9px;
+      border-top:1px solid #e8eef7;
+      background:rgba(255,255,255,.98);
+      backdrop-filter:blur(8px);
+    }
+
+    .drawer-actions a,
+    .drawer-actions button{
+      min-height:42px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      border-radius:11px;
+      text-decoration:none;
+      font-size:8.5px;
+      font-weight:700;
+    }
+
+    .primary{
+      border:1px solid #2563eb;
+      color:#fff;
+      background:#2563eb;
+    }
+
+    .primary:hover{background:#1d4ed8}
+
+    .secondary{
+      border:1px solid #bfdbfe;
+      color:#2563eb;
+      background:#fff;
+    }
+
+    .secondary:hover{background:#f8fbff}
+
 
     .toast{
       position:fixed;left:50%;bottom:24px;z-index:1200;
@@ -831,9 +1022,21 @@
       .topbar{width:calc(100% - 20px);margin-top:8px}
       .topbar-inner{min-height:62px;padding:8px 10px}
       .brand img{width:112px;height:36px;flex-basis:112px}
-      .toolbar{grid-template-columns:1fr 1fr 1fr}
+
+      /* Search gets its own row.
+         Division + Status + Sort + View remain aligned on one row. */
+      .toolbar{
+        grid-template-columns:
+          minmax(0,1fr)
+          minmax(0,1fr)
+          minmax(0,1fr)
+          auto;
+      }
       .search{grid-column:1/-1}
-      .view-toggle{justify-self:stretch}
+      .view-toggle{
+        justify-self:stretch;
+        min-width:88px;
+      }
       .view-btn{flex:1}
       .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
     }
@@ -862,8 +1065,13 @@
       .hero{min-height:0;align-items:flex-start;flex-direction:column}
       .stats{width:100%}
       .stat{flex:1}
-      .toolbar{grid-template-columns:1fr 1fr}
+      .toolbar{
+        grid-template-columns:minmax(0,1fr) minmax(0,1fr);
+      }
       .search{grid-column:1/-1}
+      #divisionDropdown{grid-column:1}
+      #statusDropdown{grid-column:2}
+      #sortDropdown{grid-column:1/-1}
       .view-toggle{grid-column:1/-1}
       .grid{grid-template-columns:1fr}
       .grid.list-view .card{align-items:stretch;flex-direction:column}
@@ -1127,7 +1335,7 @@
   <script>
     const API_URL = 'https://mrantidata.app.n8n.cloud/webhook/staff-directory-data';
     const ALLOWED_DOMAIN = 'mranti.my';
-    const CACHE_KEY = 'mranti_staff_directory_cache_v15';
+    const CACHE_KEY = 'mranti_staff_directory_cache_v17';
 
     const FIREBASE_CONFIG = {
       apiKey: 'AIzaSyDXz0gL67r9BafTg8nL6VdHYdw1tfcxhto',
@@ -1336,35 +1544,44 @@
       const root = $(rootId);
       if (!root) return;
 
-      const trigger = root.querySelector('.filter-trigger');
       const menu = root.querySelector('.filter-menu');
-      if (!trigger || !menu) return;
+      if (!menu) return;
 
-      const rect = trigger.getBoundingClientRect();
+      // Measure the visible OUTER filter control, not the inner button.
+      const rect = root.getBoundingClientRect();
       const viewportPadding = 8;
       const gap = 6;
 
-      // Explicit pixel width prevents the menu from collapsing to a tiny strip.
-      const width = Math.max(160, Math.round(rect.width));
+      const width = Math.max(1, Math.round(rect.width));
+
+      menu.style.boxSizing = 'border-box';
       menu.style.width = `${width}px`;
       menu.style.minWidth = `${width}px`;
       menu.style.maxWidth = `${width}px`;
 
-      let left = rect.left;
+      let left = Math.round(rect.left);
+
       if (left + width > window.innerWidth - viewportPadding) {
-        left = Math.max(viewportPadding, window.innerWidth - width - viewportPadding);
+        left = Math.max(
+          viewportPadding,
+          Math.round(window.innerWidth - width - viewportPadding)
+        );
       }
 
-      let top = rect.bottom + gap;
+      let top = Math.round(rect.bottom + gap);
 
-      // If there is not enough room below, open upward.
-      const estimatedHeight = Math.min(menu.scrollHeight || 310, 310);
-      if (top + estimatedHeight > window.innerHeight - viewportPadding) {
-        top = Math.max(viewportPadding, rect.top - estimatedHeight - gap);
+      // Measure after it is visible. Open upwards only when necessary.
+      const menuHeight = Math.min(menu.scrollHeight || 310, 310);
+
+      if (top + menuHeight > window.innerHeight - viewportPadding) {
+        top = Math.max(
+          viewportPadding,
+          Math.round(rect.top - menuHeight - gap)
+        );
       }
 
-      menu.style.left = `${Math.round(left)}px`;
-      menu.style.top = `${Math.round(top)}px`;
+      menu.style.left = `${left}px`;
+      menu.style.top = `${top}px`;
     }
 
     function toggleDropdown(rootId) {
@@ -1740,8 +1957,10 @@
       $('drawerContent').innerHTML = `
         <div class="drawer-profile">
           ${avatarMarkup(user, true)}
-          <h2>${esc(user.fullName || 'Unnamed staff')}</h2>
-          <p>${esc(user.jobTitle || user.department || 'MRANTI Staff')}</p>
+          <div class="drawer-identity">
+            <h2>${esc(user.fullName || 'Unnamed staff')}</h2>
+            <p>${esc(user.jobTitle || user.department || 'MRANTI Staff')}</p>
+          </div>
           <div class="drawer-chips">${divisionChip(user)}${statusChip(user)}</div>
         </div>
 
@@ -1759,7 +1978,7 @@
         </div>
 
         <div class="drawer-actions">
-          <a class="primary" href="mailto:${esc(user.primaryEmail)}">Email ${esc((user.givenName || user.fullName || 'staff').split(' ')[0])}</a>
+          <a class="primary" href="mailto:${esc(user.primaryEmail)}">Email ${esc(user.givenName || (user.fullName || 'Staff').split(' ')[0])}</a>
           <button class="secondary" type="button" id="drawerCopy">Copy email</button>
         </div>`;
 
