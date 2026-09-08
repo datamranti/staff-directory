@@ -6,11 +6,11 @@
   <meta name="theme-color" content="#f5f9ff" />
   <title>MRANTI Staff Directory</title>
 
-  <link rel="icon" type="image/png" sizes="512x512" href="./public/favicon-512.png?v=20" />
-  <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32.png?v=20" />
-  <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16.png?v=20" />
-  <link rel="shortcut icon" href="./public/favicon.ico?v=20" />
-  <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png?v=20" />
+  <link rel="icon" type="image/png" sizes="512x512" href="./public/favicon-512.png?v=21" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32.png?v=21" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16.png?v=21" />
+  <link rel="shortcut icon" href="./public/favicon.ico?v=21" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png?v=21" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -520,12 +520,13 @@
       position:relative;
       width:100%;
       min-width:0;
+      max-width:100%;
       z-index:1;
       overflow:visible;
     }
 
     .filter-dropdown.open{
-      z-index:900;
+      z-index:2;
     }
 
     .filter-trigger{
@@ -590,37 +591,32 @@
       transform:rotate(180deg);
     }
 
-    /* The menu is simply anchored to its own filter box.
-       left:0 + right:0 guarantees the exact same width as the trigger. */
-    .filter-menu{
-      position:absolute;
-      z-index:950;
-      top:calc(100% + 6px);
-      left:0;
-      right:0;
-      width:auto;
-      min-width:0;
-      max-width:none;
-      max-height:310px;
+    /* FILTER POPOVER
+       Rendered at <body> level — completely independent of toolbar/grid sizing. */
+    .filter-popover{
+      position:fixed;
+      z-index:5000;
+      display:none;
+      max-height:340px;
       overflow-y:auto;
       overflow-x:hidden;
       box-sizing:border-box;
-      padding:5px;
+      padding:6px;
       border:1px solid #dbeafe;
       border-radius:12px;
       background:#fff;
-      box-shadow:0 16px 38px rgba(15,23,42,.12),0 4px 12px rgba(37,99,235,.06);
+      box-shadow:0 18px 44px rgba(15,23,42,.16),0 5px 14px rgba(37,99,235,.08);
     }
 
-    .filter-menu.division-menu{
-      max-height:340px;
+    .filter-popover.open{
+      display:block;
     }
 
     .filter-option{
       width:100%;
       min-width:0;
-      min-height:34px;
-      padding:7px 9px;
+      min-height:36px;
+      padding:8px 10px;
       display:flex;
       align-items:center;
       justify-content:space-between;
@@ -643,7 +639,7 @@
 
     .filter-option.active{
       color:#1d4ed8;
-      background:#f2f7ff;
+      background:#eff6ff;
       font-weight:600;
     }
 
@@ -659,15 +655,15 @@
       opacity:1;
     }
 
-    .filter-menu::-webkit-scrollbar{
+    .filter-popover::-webkit-scrollbar{
       width:8px;
     }
 
-    .filter-menu::-webkit-scrollbar-track{
+    .filter-popover::-webkit-scrollbar-track{
       background:transparent;
     }
 
-    .filter-menu::-webkit-scrollbar-thumb{
+    .filter-popover::-webkit-scrollbar-thumb{
       border:2px solid #fff;
       border-radius:999px;
       background:#cbd5e1;
@@ -1340,7 +1336,6 @@
             </span>
             <svg class="filter-trigger-chevron" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"></path></svg>
           </button>
-          <div id="divisionFilterMenu" class="filter-menu division-menu" role="listbox" hidden></div>
         </div>
 
         <div class="filter-dropdown" id="statusDropdown">
@@ -1351,7 +1346,6 @@
             </span>
             <svg class="filter-trigger-chevron" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"></path></svg>
           </button>
-          <div id="statusFilterMenu" class="filter-menu" role="listbox" hidden></div>
         </div>
 
         <div class="filter-dropdown" id="sortDropdown">
@@ -1362,7 +1356,6 @@
             </span>
             <svg class="filter-trigger-chevron" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"></path></svg>
           </button>
-          <div id="sortFilterMenu" class="filter-menu" role="listbox" hidden></div>
         </div>
 
         <div class="view-toggle">
@@ -1407,12 +1400,14 @@
     <div id="drawerContent" class="drawer-body"></div>
   </aside>
 
+  <div id="filterPopover" class="filter-popover" role="listbox" aria-hidden="true"></div>
+
   <div id="toast" class="toast"></div>
 
   <script>
     const API_URL = 'https://mrantidata.app.n8n.cloud/webhook/staff-directory-data';
     const ALLOWED_DOMAIN = 'mranti.my';
-    const CACHE_KEY = 'mranti_staff_directory_cache_v20';
+    const CACHE_KEY = 'mranti_staff_directory_cache_v21';
 
     const FIREBASE_CONFIG = {
       apiKey: 'AIzaSyDXz0gL67r9BafTg8nL6VdHYdw1tfcxhto',
@@ -1577,18 +1572,31 @@
       ];
     }
 
-    function closeAllDropdowns(exceptId = '') {
-      ['divisionDropdown','statusDropdown','sortDropdown'].forEach(id => {
-        if (id === exceptId) return;
-        const root = $(id);
-        if (!root) return;
-        root.classList.remove('open');
-        const menu = root.querySelector('.filter-menu');
-        const trigger = root.querySelector('.filter-trigger');
-        if (menu) menu.hidden = true;
-        if (trigger) trigger.setAttribute('aria-expanded','false');
-      });
-    }
+    const FILTER_CONFIG = {
+      division: {
+        rootId: 'divisionDropdown',
+        buttonId: 'divisionFilterButton',
+        labelId: 'divisionFilterLabel',
+        stateKey: 'division',
+        options: () => divisionOptions()
+      },
+      status: {
+        rootId: 'statusDropdown',
+        buttonId: 'statusFilterButton',
+        labelId: 'statusFilterLabel',
+        stateKey: 'status',
+        options: () => STATUS_OPTIONS
+      },
+      sort: {
+        rootId: 'sortDropdown',
+        buttonId: 'sortFilterButton',
+        labelId: 'sortFilterLabel',
+        stateKey: 'sort',
+        options: () => SORT_OPTIONS
+      }
+    };
+
+    let openFilterKey = '';
 
     function updateDropdownUI() {
       $('divisionFilterLabel').textContent =
@@ -1599,38 +1607,121 @@
 
       $('sortFilterLabel').textContent =
         SORT_OPTIONS.find(o => o.value === filterState.sort)?.label || 'Name A–Z';
-
-      $('divisionFilterMenu').innerHTML =
-        divisionOptions().map(o => dropdownOptionMarkup(o, filterState.division)).join('');
-
-      $('statusFilterMenu').innerHTML =
-        STATUS_OPTIONS.map(o => dropdownOptionMarkup(o, filterState.status)).join('');
-
-      $('sortFilterMenu').innerHTML =
-        SORT_OPTIONS.map(o => dropdownOptionMarkup(o, filterState.sort)).join('');
     }
 
-    function toggleDropdown(rootId) {
-      const root = $(rootId);
-      const menu = root.querySelector('.filter-menu');
-      const trigger = root.querySelector('.filter-trigger');
-      const willOpen = menu.hidden;
+    function closeFilterPopover() {
+      const popover = $('filterPopover');
+      popover.classList.remove('open');
+      popover.setAttribute('aria-hidden', 'true');
+      popover.innerHTML = '';
+      popover.style.left = '';
+      popover.style.top = '';
+      popover.style.width = '';
+      popover.style.maxHeight = '';
 
-      closeAllDropdowns(rootId);
-      menu.hidden = !willOpen;
-      root.classList.toggle('open', willOpen);
-      trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+      Object.values(FILTER_CONFIG).forEach(config => {
+        const root = $(config.rootId);
+        const button = $(config.buttonId);
+        root?.classList.remove('open');
+        button?.setAttribute('aria-expanded', 'false');
+      });
+
+      openFilterKey = '';
     }
 
-    function handleDropdownSelection(rootId, stateKey, value) {
-      filterState[stateKey] = value;
+    // Keep compatibility with clearFilters().
+    function closeAllDropdowns() {
+      closeFilterPopover();
+    }
+
+    function positionFilterPopover(filterKey) {
+      const config = FILTER_CONFIG[filterKey];
+      const button = $(config.buttonId);
+      const popover = $('filterPopover');
+      if (!button || !popover) return;
+
+      const rect = button.getBoundingClientRect();
+      const viewportPadding = 10;
+      const gap = 6;
+
+      // EXACT trigger width. Minimum protects narrow mobile controls.
+      const width = Math.max(170, Math.round(rect.width));
+
+      let left = Math.round(rect.left);
+      if (left + width > window.innerWidth - viewportPadding) {
+        left = Math.max(
+          viewportPadding,
+          Math.round(window.innerWidth - width - viewportPadding)
+        );
+      }
+
+      popover.style.width = `${width}px`;
+      popover.style.left = `${left}px`;
+
+      // Cap menu height based on the available viewport.
+      const spaceBelow = window.innerHeight - rect.bottom - gap - viewportPadding;
+      const spaceAbove = rect.top - gap - viewportPadding;
+      const desiredMax = filterKey === 'division' ? 340 : 220;
+
+      if (spaceBelow >= 150 || spaceBelow >= spaceAbove) {
+        const maxHeight = Math.max(120, Math.min(desiredMax, spaceBelow));
+        popover.style.maxHeight = `${Math.floor(maxHeight)}px`;
+        popover.style.top = `${Math.round(rect.bottom + gap)}px`;
+      } else {
+        const maxHeight = Math.max(120, Math.min(desiredMax, spaceAbove));
+        popover.style.maxHeight = `${Math.floor(maxHeight)}px`;
+
+        // Show first, then use the actual rendered height to place above.
+        requestAnimationFrame(() => {
+          const height = Math.min(popover.scrollHeight, maxHeight);
+          popover.style.top = `${Math.max(
+            viewportPadding,
+            Math.round(rect.top - height - gap)
+          )}px`;
+        });
+      }
+    }
+
+    function openFilterPopover(filterKey) {
+      const config = FILTER_CONFIG[filterKey];
+      const popover = $('filterPopover');
+      const root = $(config.rootId);
+      const button = $(config.buttonId);
+
+      if (openFilterKey === filterKey && popover.classList.contains('open')) {
+        closeFilterPopover();
+        return;
+      }
+
+      closeFilterPopover();
+
+      const options = config.options();
+      const currentValue = filterState[config.stateKey];
+
+      popover.innerHTML = options
+        .map(option => dropdownOptionMarkup(option, currentValue))
+        .join('');
+
+      popover.dataset.filterKey = filterKey;
+      popover.classList.add('open');
+      popover.setAttribute('aria-hidden', 'false');
+
+      root?.classList.add('open');
+      button?.setAttribute('aria-expanded', 'true');
+      openFilterKey = filterKey;
+
+      positionFilterPopover(filterKey);
+    }
+
+    function handleFilterSelection(filterKey, value) {
+      const config = FILTER_CONFIG[filterKey];
+      if (!config) return;
+
+      filterState[config.stateKey] =
+        config.stateKey === 'sort' ? (value || 'name') : value;
+
       updateDropdownUI();
-
-      const root = $(rootId);
-      root.classList.remove('open');
-      root.querySelector('.filter-menu').hidden = true;
-      root.querySelector('.filter-trigger').setAttribute('aria-expanded','false');
-
+      closeFilterPopover();
       render();
     }
 
@@ -1638,42 +1729,42 @@
       updateDropdownUI();
 
       $('divisionFilterButton').addEventListener('click', event => {
+        event.preventDefault();
         event.stopPropagation();
-        toggleDropdown('divisionDropdown');
+        openFilterPopover('division');
       });
 
       $('statusFilterButton').addEventListener('click', event => {
+        event.preventDefault();
         event.stopPropagation();
-        toggleDropdown('statusDropdown');
+        openFilterPopover('status');
       });
 
       $('sortFilterButton').addEventListener('click', event => {
+        event.preventDefault();
         event.stopPropagation();
-        toggleDropdown('sortDropdown');
+        openFilterPopover('sort');
       });
 
-      $('divisionFilterMenu').addEventListener('click', event => {
+      $('filterPopover').addEventListener('click', event => {
+        event.stopPropagation();
         const option = event.target.closest('.filter-option');
-        if (!option) return;
-        handleDropdownSelection('divisionDropdown', 'division', option.dataset.value || '');
-      });
-
-      $('statusFilterMenu').addEventListener('click', event => {
-        const option = event.target.closest('.filter-option');
-        if (!option) return;
-        handleDropdownSelection('statusDropdown', 'status', option.dataset.value || '');
-      });
-
-      $('sortFilterMenu').addEventListener('click', event => {
-        const option = event.target.closest('.filter-option');
-        if (!option) return;
-        handleDropdownSelection('sortDropdown', 'sort', option.dataset.value || 'name');
+        if (!option || !openFilterKey) return;
+        handleFilterSelection(openFilterKey, option.dataset.value || '');
       });
 
       document.addEventListener('click', event => {
-        if (!event.target.closest('.filter-dropdown')) closeAllDropdowns();
+        if (
+          !event.target.closest('.filter-dropdown') &&
+          !event.target.closest('#filterPopover')
+        ) {
+          closeFilterPopover();
+        }
       });
 
+      // Never allow a detached menu after the page moves.
+      window.addEventListener('scroll', closeFilterPopover, { passive: true });
+      window.addEventListener('resize', closeFilterPopover);
     }
 
     function statusChip(user) {
