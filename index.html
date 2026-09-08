@@ -19,7 +19,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
-    <link rel="stylesheet" href="./src/styles.css?v=25" />
+    <link rel="stylesheet" href="./src/styles.css?v=26" />
 </head>
 
 <body>
@@ -256,7 +256,7 @@
   <script>
     const API_URL = 'https://mrantidata.app.n8n.cloud/webhook/staff-directory-data';
     const ALLOWED_DOMAIN = 'mranti.my';
-    const CACHE_KEY = 'mranti_staff_directory_cache_v25';
+    const CACHE_KEY = 'mranti_staff_directory_cache_v26';
 
     const FIREBASE_CONFIG = {
       apiKey: 'AIzaSyDXz0gL67r9BafTg8nL6VdHYdw1tfcxhto',
@@ -834,15 +834,36 @@
       const cleanEmail = String(email || '').trim();
       if (!cleanEmail) return;
 
-      // Open Gmail's normal inbox compose panel (not the standalone full-page composer).
-      const gmailUrl = 'https://mail.google.com/mail/u/0/#inbox?compose=new';
-      window.open(gmailUrl, '_blank', 'noopener,noreferrer');
+      // Gmail's normal inbox compose panel does NOT reliably accept a prefilled recipient.
+      // Use Gmail's supported compose URL instead, but open it as a compact popup
+      // so the user still gets a small compose experience rather than a huge full-page tab.
+      const gmailUrl =
+        'https://mail.google.com/mail/u/0/?view=cm&fs=1&tf=1&to=' +
+        encodeURIComponent(cleanEmail);
 
-      // Gmail does not reliably prefill "To" in this normal compose mode,
-      // so copy the recipient immediately for a one-paste workflow.
-      navigator.clipboard.writeText(cleanEmail)
-        .then(() => toast('Email copied — paste it into To'))
-        .catch(() => toast(`Copy this email: ${cleanEmail}`));
+      const popupWidth = 720;
+      const popupHeight = 720;
+      const left = Math.max(0, Math.round((window.screen.width - popupWidth) / 2));
+      const top = Math.max(0, Math.round((window.screen.height - popupHeight) / 2));
+
+      const popup = window.open(
+        gmailUrl,
+        'mrantiGmailCompose',
+        [
+          'popup=yes',
+          `width=${popupWidth}`,
+          `height=${popupHeight}`,
+          `left=${left}`,
+          `top=${top}`,
+          'resizable=yes',
+          'scrollbars=yes'
+        ].join(',')
+      );
+
+      // If the browser blocks popup sizing, fall back to a normal new tab.
+      if (!popup) {
+        window.open(gmailUrl, '_blank', 'noopener,noreferrer');
+      }
     }
 
     async function copyEmail(email) {
