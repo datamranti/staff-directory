@@ -6,11 +6,11 @@
   <meta name="theme-color" content="#f5f9ff" />
   <title>MRANTI Staff Directory</title>
 
-  <link rel="icon" type="image/png" sizes="512x512" href="./public/favicon-512.png?v=12" />
-  <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32.png?v=12" />
-  <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16.png?v=12" />
-  <link rel="shortcut icon" href="./public/favicon.ico?v=12" />
-  <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png?v=12" />
+  <link rel="icon" type="image/png" sizes="512x512" href="./public/favicon-512.png?v=13" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32.png?v=13" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16.png?v=13" />
+  <link rel="shortcut icon" href="./public/favicon.ico?v=13" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png?v=13" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -907,7 +907,7 @@
               alt="MRANTI 30 Years" />
             <span class="login-brand-divider" aria-hidden="true"></span>
             <div class="login-brand-copy">
-              <div class="login-brand-name">Staff Directory</div>
+              <div class="login-brand-name">STAFF DIRECTORY</div>
               <div class="login-brand-product">Workspace</div>
             </div>
           </div>
@@ -989,7 +989,7 @@
             src="https://cdn.prod.website-files.com/6719e3902a71ea8154ba371d/6996a2c470a01e3f32ffa080_M30.png"
             alt="MRANTI 30 Years" />
           <span class="divider" aria-hidden="true"></span>
-          <span class="brand-page-name">Staff Directory</span>
+          <span class="brand-page-name">STAFF DIRECTORY</span>
         </div>
 
 
@@ -1122,7 +1122,7 @@
   <script>
     const API_URL = 'https://mrantidata.app.n8n.cloud/webhook/staff-directory-data';
     const ALLOWED_DOMAIN = 'mranti.my';
-    const CACHE_KEY = 'mranti_staff_directory_cache_v12';
+    const CACHE_KEY = 'mranti_staff_directory_cache_v13';
 
     const FIREBASE_CONFIG = {
       apiKey: 'AIzaSyDXz0gL67r9BafTg8nL6VdHYdw1tfcxhto',
@@ -1436,8 +1436,29 @@
         </article>`;
     }
 
-    function searchText(user) {
-      return norm([
+    function searchTokens(value) {
+      return norm(value)
+        .split(/[^a-z0-9]+/)
+        .map(token => token.trim())
+        .filter(Boolean);
+    }
+
+    function matchesSearch(user, query) {
+      const q = norm(query);
+      if (!q) return true;
+
+      // Phone searches remain substring-based because users may type partial numbers.
+      const digits = String(query || '').replace(/\D/g, '');
+      if (digits && digits.length >= 3) {
+        const phoneDigits = String(user.phoneNumbers || '').replace(/\D/g, '');
+        if (phoneDigits.includes(digits)) return true;
+      }
+
+      // Text searches are token/prefix based, NOT arbitrary substring based.
+      // Example:
+      //   "aina" matches "Aina A Rahman"
+      //   "aina" does NOT match "Zainal"
+      const haystackTokens = searchTokens([
         user.fullName,
         user.givenName,
         user.familyName,
@@ -1446,11 +1467,17 @@
         user.department,
         user.rawDepartment,
         user.organisationUnit,
-        user.phoneNumbers,
         user.aliases,
         user.additionalEmails,
         user.status
       ].join(' '));
+
+      const queryTokens = searchTokens(q);
+      if (!queryTokens.length) return false;
+
+      return queryTokens.every(qToken =>
+        haystackTokens.some(token => token.startsWith(qToken))
+      );
     }
 
     function sortUsers(users) {
@@ -1483,7 +1510,7 @@
         allUsers.filter(user =>
           (!division || user.department === division) &&
           (!status || user.status === status) &&
-          (!q || searchText(user).includes(q))
+          matchesSearch(user, q)
         )
       );
 
