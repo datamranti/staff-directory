@@ -6,11 +6,11 @@
   <meta name="theme-color" content="#f5f9ff" />
   <title>MRANTI Staff Directory</title>
 
-  <link rel="icon" type="image/png" sizes="512x512" href="./public/favicon-512.png?v=14" />
-  <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32.png?v=14" />
-  <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16.png?v=14" />
-  <link rel="shortcut icon" href="./public/favicon.ico?v=14" />
-  <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png?v=14" />
+  <link rel="icon" type="image/png" sizes="512x512" href="./public/favicon-512.png?v=15" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32.png?v=15" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16.png?v=15" />
+  <link rel="shortcut icon" href="./public/favicon.ico?v=15" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png?v=15" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -331,10 +331,10 @@
     }
     .divider{width:1px;height:28px;background:#d8e1ef}
     .brand-page-name{
-      color:#2563eb;
+      color:#64748b;
       font-size:10px;
       line-height:1;
-      font-weight:500;
+      font-weight:400;
       letter-spacing:1.6px;
       text-transform:uppercase;
       white-space:nowrap;
@@ -553,13 +553,8 @@
       transform:rotate(180deg);
     }
     .filter-menu{
-      position:absolute;
-      z-index:760;
-      top:calc(100% + 6px);
-      left:0;
-      width:100%;
-      min-width:100%;
-      max-width:100%;
+      position:fixed;
+      z-index:2000;
       max-height:310px;
       overflow:auto;
       padding:5px;
@@ -569,9 +564,7 @@
       box-shadow:0 16px 38px rgba(15,23,42,.12),0 4px 12px rgba(37,99,235,.06);
     }
     .filter-menu.division-menu{
-      width:100%;
-      min-width:100%;
-      max-width:100%;
+      max-height:340px;
     }
     .filter-option{
       width:100%;
@@ -919,19 +912,20 @@
               alt="MRANTI 30 Years" />
             <span class="login-brand-divider" aria-hidden="true"></span>
             <div class="login-brand-copy">
-              <div class="login-brand-product">STAFF DIRECTORY</div>
+              <div class="login-brand-name">STAFF DIRECTORY</div>
+              <div class="login-brand-product">Workspace</div>
             </div>
           </div>
         </div>
 
         <div class="login-hero-copy">
-          <div class="login-eyebrow">MRANTI Staff Directory</div>
+          <div class="login-eyebrow">MRANTI people directory</div>
           <h1 class="login-hero-title">
             <span>Find the right</span>
             <span class="accent">person, faster.</span>
           </h1>
           <p class="login-hero-subtitle">
-            Search MRANTI staffs by name, role, division, email or phone in one trusted internal directory.
+            Search MRANTI colleagues by name, role, division, email or phone in one trusted internal directory.
           </p>
         </div>
       </section>
@@ -975,7 +969,7 @@
       <section class="login-benefit-band" aria-label="Staff Directory benefits">
         <div class="login-benefit-card">
           <span class="login-benefit-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg></span>
-          <strong>Find staffs quickly</strong>
+          <strong>Find colleagues quickly</strong>
           <span>Search across people, roles, divisions and contact details.</span>
         </div>
         <div class="login-benefit-card">
@@ -1037,7 +1031,7 @@
         <div>
           <div class="eyebrow">MRANTI STAFF DIRECTORY</div>
           <h1>Staff Directory</h1>
-          <p>Find MRANTI staffs by name, role, division, email or phone.</p>
+          <p>Find MRANTI colleagues by name, role, division, email or phone.</p>
         </div>
 
         <div class="stats">
@@ -1133,7 +1127,7 @@
   <script>
     const API_URL = 'https://mrantidata.app.n8n.cloud/webhook/staff-directory-data';
     const ALLOWED_DOMAIN = 'mranti.my';
-    const CACHE_KEY = 'mranti_staff_directory_cache_v14';
+    const CACHE_KEY = 'mranti_staff_directory_cache_v15';
 
     const FIREBASE_CONFIG = {
       apiKey: 'AIzaSyDXz0gL67r9BafTg8nL6VdHYdw1tfcxhto',
@@ -1306,7 +1300,14 @@
         root.classList.remove('open');
         const menu = root.querySelector('.filter-menu');
         const trigger = root.querySelector('.filter-trigger');
-        if (menu) menu.hidden = true;
+        if (menu) {
+          menu.hidden = true;
+          menu.style.left = '';
+          menu.style.top = '';
+          menu.style.width = '';
+          menu.style.minWidth = '';
+          menu.style.maxWidth = '';
+        }
         if (trigger) trigger.setAttribute('aria-expanded','false');
       });
     }
@@ -1331,6 +1332,41 @@
         SORT_OPTIONS.map(o => dropdownOptionMarkup(o, filterState.sort)).join('');
     }
 
+    function positionDropdownMenu(rootId) {
+      const root = $(rootId);
+      if (!root) return;
+
+      const trigger = root.querySelector('.filter-trigger');
+      const menu = root.querySelector('.filter-menu');
+      if (!trigger || !menu) return;
+
+      const rect = trigger.getBoundingClientRect();
+      const viewportPadding = 8;
+      const gap = 6;
+
+      // Explicit pixel width prevents the menu from collapsing to a tiny strip.
+      const width = Math.max(160, Math.round(rect.width));
+      menu.style.width = `${width}px`;
+      menu.style.minWidth = `${width}px`;
+      menu.style.maxWidth = `${width}px`;
+
+      let left = rect.left;
+      if (left + width > window.innerWidth - viewportPadding) {
+        left = Math.max(viewportPadding, window.innerWidth - width - viewportPadding);
+      }
+
+      let top = rect.bottom + gap;
+
+      // If there is not enough room below, open upward.
+      const estimatedHeight = Math.min(menu.scrollHeight || 310, 310);
+      if (top + estimatedHeight > window.innerHeight - viewportPadding) {
+        top = Math.max(viewportPadding, rect.top - estimatedHeight - gap);
+      }
+
+      menu.style.left = `${Math.round(left)}px`;
+      menu.style.top = `${Math.round(top)}px`;
+    }
+
     function toggleDropdown(rootId) {
       const root = $(rootId);
       const menu = root.querySelector('.filter-menu');
@@ -1341,6 +1377,11 @@
       menu.hidden = !willOpen;
       root.classList.toggle('open', willOpen);
       trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+
+      if (willOpen) {
+        // Position only after un-hiding so scrollHeight is measurable.
+        requestAnimationFrame(() => positionDropdownMenu(rootId));
+      }
     }
 
     function handleDropdownSelection(rootId, stateKey, value) {
@@ -1394,6 +1435,15 @@
       document.addEventListener('click', event => {
         if (!event.target.closest('.filter-dropdown')) closeAllDropdowns();
       });
+
+      window.addEventListener('resize', () => {
+        ['divisionDropdown','statusDropdown','sortDropdown'].forEach(id => {
+          const root = $(id);
+          if (root?.classList.contains('open')) positionDropdownMenu(id);
+        });
+      });
+
+      window.addEventListener('scroll', () => closeAllDropdowns(), { passive: true });
     }
 
     function statusChip(user) {
