@@ -6,11 +6,11 @@
   <meta name="theme-color" content="#f5f9ff" />
   <title>MRANTI Staff Directory</title>
 
-  <link rel="icon" type="image/png" sizes="512x512" href="./public/favicon-512.png?v=8" />
-  <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32.png?v=8" />
-  <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16.png?v=8" />
-  <link rel="shortcut icon" href="./public/favicon.ico?v=8" />
-  <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png?v=8" />
+  <link rel="icon" type="image/png" sizes="512x512" href="./public/favicon-512.png?v=9" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32.png?v=9" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16.png?v=9" />
+  <link rel="shortcut icon" href="./public/favicon.ico?v=9" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png?v=9" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -365,13 +365,36 @@
       color:#0f172a;
       text-align:left;
     }
-    .user-avatar{
-      width:32px;height:32px;flex:0 0 32px;
-      display:grid;place-items:center;
+    .user-avatar-shell{
+      width:32px;
+      height:32px;
+      flex:0 0 32px;
+      position:relative;
+      overflow:hidden;
       border-radius:9px;
-      color:#fff;background:#6ea83a;
-      font-size:12px;font-weight:700;
+      background:#6ea83a;
     }
+    .user-avatar-photo{
+      position:absolute;
+      inset:0;
+      width:100%;
+      height:100%;
+      object-fit:cover;
+      display:none;
+      background:#eef4ff;
+    }
+    .user-avatar-initial{
+      position:absolute;
+      inset:0;
+      display:grid;
+      place-items:center;
+      color:#fff;
+      background:#6ea83a;
+      font-size:12px;
+      font-weight:700;
+    }
+    .user-avatar-shell.has-photo .user-avatar-photo{display:block}
+    .user-avatar-shell.has-photo .user-avatar-initial{display:none}
     .user-copy{min-width:0;flex:1;display:flex;flex-direction:column}
     .user-copy strong,.user-copy span{
       max-width:145px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap
@@ -854,7 +877,10 @@
           </button>
 
           <button id="userButton" class="user-btn" type="button" aria-expanded="false">
-            <span id="userInitial" class="user-avatar">MR</span>
+            <span id="userAvatarShell" class="user-avatar-shell">
+              <img id="userPhoto" class="user-avatar-photo" alt="" referrerpolicy="no-referrer" />
+              <span id="userInitial" class="user-avatar-initial">MR</span>
+            </span>
             <span class="user-copy">
               <strong id="userName">MRANTI Staff</strong>
               <span id="userEmail"></span>
@@ -965,7 +991,7 @@
   <script>
     const API_URL = 'https://mrantidata.app.n8n.cloud/webhook/staff-directory-data';
     const ALLOWED_DOMAIN = 'mranti.my';
-    const CACHE_KEY = 'mranti_staff_directory_cache_v8';
+    const CACHE_KEY = 'mranti_staff_directory_cache_v9';
 
     const FIREBASE_CONFIG = {
       apiKey: 'AIzaSyDXz0gL67r9BafTg8nL6VdHYdw1tfcxhto',
@@ -1000,6 +1026,7 @@
     let allUsers = [];
     let currentView = 'grid';
     let refreshInProgress = false;
+    let currentAuthUser = null;
 
     function esc(value) {
       return String(value ?? '')
@@ -1195,8 +1222,53 @@
       $('staffGrid').hidden = filtered.length === 0;
     }
 
+    function setSignedInAvatar(photoUrl, fallbackName = '') {
+      const shell = $('userAvatarShell');
+      const photo = $('userPhoto');
+      const initial = $('userInitial');
+
+      initial.textContent = initials(fallbackName || 'MRANTI Staff');
+
+      const cleanUrl = String(photoUrl || '').trim();
+      if (!cleanUrl) {
+        photo.removeAttribute('src');
+        shell.classList.remove('has-photo');
+        return;
+      }
+
+      photo.onload = () => shell.classList.add('has-photo');
+      photo.onerror = () => {
+        photo.removeAttribute('src');
+        shell.classList.remove('has-photo');
+      };
+
+      // Force a clean reload when switching between Firebase and Directory photos.
+      shell.classList.remove('has-photo');
+      photo.src = cleanUrl;
+    }
+
+    function syncSignedInAvatarFromDirectory() {
+      const authEmail = String(currentAuthUser?.email || '').trim().toLowerCase();
+      if (!authEmail) return;
+
+      const ownRecord = allUsers.find(user =>
+        String(user.primaryEmail || '').trim().toLowerCase() === authEmail
+      );
+
+      // Workspace Directory photo is the preferred source.
+      // Firebase/Google Auth photo remains the fallback if Directory has no thumbnail.
+      const workspacePhoto = String(ownRecord?.thumbnailPhotoUrl || '').trim();
+      const authPhoto = String(currentAuthUser?.photoURL || '').trim();
+
+      setSignedInAvatar(
+        workspacePhoto || authPhoto,
+        ownRecord?.fullName || currentAuthUser?.displayName || currentAuthUser?.email
+      );
+    }
+
     function setData(data) {
       allUsers = Array.isArray(data?.users) ? data.users.slice() : [];
+      syncSignedInAvatarFromDirectory();
 
       $('activeCount').textContent =
         Number.isFinite(Number(data?.activeUsers))
@@ -1370,13 +1442,20 @@
     }
 
     function showApp(user) {
+      currentAuthUser = user;
       $('loginScreen').hidden = true;
       $('appScreen').hidden = false;
       $('userName').textContent = user.displayName || user.email || 'MRANTI Staff';
       $('userEmail').textContent = user.email || '';
       $('menuName').textContent = user.displayName || 'MRANTI Staff';
       $('menuEmail').textContent = user.email || '';
-      $('userInitial').textContent = initials(user.displayName || user.email);
+
+      // Show the Google sign-in profile image immediately.
+      // Once directory data arrives, the Workspace Directory thumbnail becomes the source of truth.
+      setSignedInAvatar(
+        user.photoURL || '',
+        user.displayName || user.email || 'MRANTI Staff'
+      );
     }
 
     function validDomain(user) {
@@ -1468,6 +1547,7 @@
 
     firebase.auth().onAuthStateChanged(async user => {
       if (!user) {
+        currentAuthUser = null;
         showLogin();
         return;
       }
