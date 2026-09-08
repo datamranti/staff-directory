@@ -6,11 +6,11 @@
   <meta name="theme-color" content="#f5f9ff" />
   <title>MRANTI Staff Directory</title>
 
-  <link rel="icon" type="image/png" sizes="512x512" href="./public/favicon-512.png?v=9" />
-  <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32.png?v=9" />
-  <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16.png?v=9" />
-  <link rel="shortcut icon" href="./public/favicon.ico?v=9" />
-  <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png?v=9" />
+  <link rel="icon" type="image/png" sizes="512x512" href="./public/favicon-512.png?v=10" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32.png?v=10" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16.png?v=10" />
+  <link rel="shortcut icon" href="./public/favicon.ico?v=10" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png?v=10" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -474,7 +474,7 @@
       grid-template-columns:minmax(360px,1.45fr) minmax(180px,.55fr) minmax(150px,.45fr) minmax(150px,.45fr) auto;
       gap:10px;
     }
-    .search,.select,.view-toggle{
+    .search,.filter-dropdown,.view-toggle{
       min-height:48px;
       border:1px solid rgba(191,219,254,.78);
       border-radius:13px;
@@ -487,15 +487,122 @@
       min-width:0;flex:1;border:0;outline:0;background:transparent;
       color:#0f172a;font-size:11.5px
     }
-    .select{padding:7px 11px 6px;display:flex;flex-direction:column;justify-content:center}
-    .select span{
-      color:#94a3b8;font-size:7.5px;font-weight:700;
-      letter-spacing:.08em;text-transform:uppercase
+
+    .filter-dropdown{
+      position:relative;
+      min-width:0;
     }
-    .select select{
-      width:100%;border:0;outline:0;background:transparent;
-      color:#334155;font-size:10px;font-weight:650
+    .filter-trigger{
+      width:100%;
+      min-height:46px;
+      padding:7px 11px 6px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:10px;
+      border:0;
+      border-radius:12px;
+      background:transparent;
+      color:#334155;
+      text-align:left;
     }
+    .filter-trigger:hover,
+    .filter-dropdown.open .filter-trigger{
+      background:#f8fbff;
+    }
+    .filter-trigger-copy{
+      min-width:0;
+      display:flex;
+      flex-direction:column;
+      gap:1px;
+    }
+    .filter-trigger-copy small{
+      color:#94a3b8;
+      font-size:7.5px;
+      line-height:1.2;
+      font-weight:700;
+      letter-spacing:.08em;
+      text-transform:uppercase;
+    }
+    .filter-trigger-copy strong{
+      min-width:0;
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+      color:#334155;
+      font-size:10px;
+      line-height:1.4;
+      font-weight:650;
+    }
+    .filter-trigger-chevron{
+      width:15px;
+      height:15px;
+      flex:0 0 15px;
+      color:#53627a;
+      transition:transform .16s ease;
+    }
+    .filter-dropdown.open .filter-trigger-chevron{
+      transform:rotate(180deg);
+    }
+    .filter-menu{
+      position:absolute;
+      z-index:600;
+      top:calc(100% + 7px);
+      left:0;
+      min-width:100%;
+      width:max-content;
+      max-width:min(340px,80vw);
+      max-height:320px;
+      overflow:auto;
+      padding:6px;
+      border:1px solid #dbeafe;
+      border-radius:13px;
+      background:#fff;
+      box-shadow:0 18px 45px rgba(15,23,42,.14),0 4px 14px rgba(37,99,235,.07);
+    }
+    .filter-menu.division-menu{min-width:260px}
+    .filter-option{
+      width:100%;
+      min-height:36px;
+      padding:8px 9px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:14px;
+      border:0;
+      border-radius:9px;
+      background:#fff;
+      color:#334155;
+      text-align:left;
+      font-size:10px;
+      line-height:1.35;
+      font-weight:550;
+    }
+    .filter-option:hover{
+      color:#1d4ed8;
+      background:#f4f8ff;
+    }
+    .filter-option.active{
+      color:#1d4ed8;
+      background:#eff6ff;
+      font-weight:700;
+    }
+    .filter-option-check{
+      width:15px;
+      height:15px;
+      flex:0 0 15px;
+      color:#2563eb;
+      opacity:0;
+    }
+    .filter-option.active .filter-option-check{opacity:1}
+    .filter-menu::-webkit-scrollbar{width:8px}
+    .filter-menu::-webkit-scrollbar-track{background:transparent}
+    .filter-menu::-webkit-scrollbar-thumb{
+      border:2px solid #fff;
+      border-radius:999px;
+      background:#cbd5e1;
+    }
+
     .view-toggle{display:flex;align-items:center;padding:4px}
     .view-btn{
       width:39px;height:38px;border:0;border-radius:10px;
@@ -573,9 +680,14 @@
       object-fit:cover;background:#edf4ff;
     }
     .avatar-fallback{
-      position:absolute;inset:0;display:grid;place-items:center;
-      color:#2563eb;font-size:14px;font-weight:800;
+      position:absolute;
+      inset:0;
+      display:grid;
+      place-items:center;
+      color:#8ea3c1;
+      background:linear-gradient(180deg,#f5f9ff,#edf4ff);
     }
+    .avatar-fallback svg{width:23px;height:23px;stroke-width:1.7}
     .avatar-wrap.has-photo .avatar-fallback{display:none}
     .staff-copy{min-width:0;flex:1}
     .name-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
@@ -661,8 +773,16 @@
       border:1px solid #bfd7fb;border-radius:21px;background:#edf4ff
     }
     .drawer-avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-    .drawer-avatar span{position:absolute;inset:0;display:grid;place-items:center;color:#2563eb;font-size:19px;font-weight:800}
-    .drawer-avatar.has-photo span{display:none}
+    .drawer-avatar .drawer-avatar-fallback{
+      position:absolute;
+      inset:0;
+      display:grid;
+      place-items:center;
+      color:#8ea3c1;
+      background:linear-gradient(180deg,#f5f9ff,#edf4ff);
+    }
+    .drawer-avatar .drawer-avatar-fallback svg{width:32px;height:32px;stroke-width:1.65}
+    .drawer-avatar.has-photo .drawer-avatar-fallback{display:none}
     .drawer-profile h2{margin:0;color:#0f172a;font-size:18px;line-height:1.4;letter-spacing:-.35px}
     .drawer-profile p{margin:4px 0 9px;color:#64748b;font-size:9px}
     .drawer-chips{display:flex;justify-content:center;gap:5px;flex-wrap:wrap}
@@ -765,7 +885,7 @@
       .hero h1{font-size:29px}
       .stats{flex-direction:column}
       .toolbar{grid-template-columns:1fr}
-      .search,.select,.view-toggle{grid-column:1!important}
+      .search,.filter-dropdown,.view-toggle{grid-column:1!important}
       .panel{padding:10px}
       .name-row{flex-direction:column}
       .chips{align-items:flex-start;justify-content:flex-start}
@@ -920,29 +1040,38 @@
           <input id="searchInput" type="search" autocomplete="off" placeholder="Search name, role, division, email or phone…" />
         </label>
 
-        <label class="select">
-          <span>Division</span>
-          <select id="departmentFilter"></select>
-        </label>
+        <div class="filter-dropdown" id="divisionDropdown">
+          <button id="divisionFilterButton" class="filter-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+            <span class="filter-trigger-copy">
+              <small>Division</small>
+              <strong id="divisionFilterLabel">All divisions</strong>
+            </span>
+            <svg class="filter-trigger-chevron" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"></path></svg>
+          </button>
+          <div id="divisionFilterMenu" class="filter-menu division-menu" role="listbox" hidden></div>
+        </div>
 
-        <label class="select">
-          <span>Status</span>
-          <select id="statusFilter">
-            <option value="">All staff</option>
-            <option value="Active">Active</option>
-            <option value="Resigned">Resigned</option>
-          </select>
-        </label>
+        <div class="filter-dropdown" id="statusDropdown">
+          <button id="statusFilterButton" class="filter-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+            <span class="filter-trigger-copy">
+              <small>Status</small>
+              <strong id="statusFilterLabel">All staff</strong>
+            </span>
+            <svg class="filter-trigger-chevron" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"></path></svg>
+          </button>
+          <div id="statusFilterMenu" class="filter-menu" role="listbox" hidden></div>
+        </div>
 
-        <label class="select">
-          <span>Sort</span>
-          <select id="sortSelect">
-            <option value="name">Name A–Z</option>
-            <option value="department">Division</option>
-            <option value="title">Job title</option>
-            <option value="status">Status</option>
-          </select>
-        </label>
+        <div class="filter-dropdown" id="sortDropdown">
+          <button id="sortFilterButton" class="filter-trigger" type="button" aria-haspopup="listbox" aria-expanded="false">
+            <span class="filter-trigger-copy">
+              <small>Sort</small>
+              <strong id="sortFilterLabel">Name A–Z</strong>
+            </span>
+            <svg class="filter-trigger-chevron" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"></path></svg>
+          </button>
+          <div id="sortFilterMenu" class="filter-menu" role="listbox" hidden></div>
+        </div>
 
         <div class="view-toggle">
           <button id="gridViewButton" class="view-btn active" type="button" aria-label="Grid view">
@@ -991,7 +1120,7 @@
   <script>
     const API_URL = 'https://mrantidata.app.n8n.cloud/webhook/staff-directory-data';
     const ALLOWED_DOMAIN = 'mranti.my';
-    const CACHE_KEY = 'mranti_staff_directory_cache_v9';
+    const CACHE_KEY = 'mranti_staff_directory_cache_v10';
 
     const FIREBASE_CONFIG = {
       apiKey: 'AIzaSyDXz0gL67r9BafTg8nL6VdHYdw1tfcxhto',
@@ -1028,6 +1157,25 @@
     let refreshInProgress = false;
     let currentAuthUser = null;
 
+    const filterState = {
+      division: '',
+      status: '',
+      sort: 'name'
+    };
+
+    const STATUS_OPTIONS = [
+      { value: '', label: 'All staff' },
+      { value: 'Active', label: 'Active' },
+      { value: 'Resigned', label: 'Resigned' }
+    ];
+
+    const SORT_OPTIONS = [
+      { value: 'name', label: 'Name A–Z' },
+      { value: 'department', label: 'Division' },
+      { value: 'title', label: 'Job title' },
+      { value: 'status', label: 'Status' }
+    ];
+
     function esc(value) {
       return String(value ?? '')
         .replace(/&/g,'&amp;')
@@ -1055,41 +1203,45 @@
       return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }
 
-    function avatarMarkup(user, drawer = false) {
-      const cls = drawer ? 'drawer-avatar' : 'avatar-wrap';
-      const photo = String(user.thumbnailPhotoUrl || '').trim();
-      const initial = esc(initials(user.fullName));
+    function genericAvatarIcon() {
+      return `
+        <svg viewBox="0 0 24 24" aria-hidden="true">
+          <circle cx="12" cy="8" r="4"></circle>
+          <path d="M4.5 21a7.5 7.5 0 0 1 15 0"></path>
+        </svg>`;
+    }
 
-      if (!photo) {
-        return `<div class="${cls}"><span class="${drawer ? '' : 'avatar-fallback'}">${initial}</span></div>`;
-      }
+    function avatarMarkup(user, drawer = false) {
+      const photo = String(user.thumbnailPhotoUrl || '').trim();
 
       if (drawer) {
         return `
           <div class="drawer-avatar">
-            <span>${initial}</span>
-            <img
-              src="${esc(photo)}"
-              alt="${esc(user.fullName)}"
-              referrerpolicy="no-referrer"
-              onload="this.parentElement.classList.add('has-photo')"
-              onerror="this.style.display='none';this.parentElement.classList.remove('has-photo')"
-            />
+            <span class="drawer-avatar-fallback">${genericAvatarIcon()}</span>
+            ${photo ? `
+              <img
+                src="${esc(photo)}"
+                alt="${esc(user.fullName)}"
+                referrerpolicy="no-referrer"
+                onload="this.parentElement.classList.add('has-photo')"
+                onerror="this.style.display='none';this.parentElement.classList.remove('has-photo')"
+              />` : ''}
           </div>`;
       }
 
       return `
         <div class="avatar-wrap">
-          <span class="avatar-fallback">${initial}</span>
-          <img
-            class="avatar-photo"
-            src="${esc(photo)}"
-            alt="${esc(user.fullName)}"
-            loading="lazy"
-            referrerpolicy="no-referrer"
-            onload="this.parentElement.classList.add('has-photo')"
-            onerror="this.style.display='none';this.parentElement.classList.remove('has-photo')"
-          />
+          <span class="avatar-fallback">${genericAvatarIcon()}</span>
+          ${photo ? `
+            <img
+              class="avatar-photo"
+              src="${esc(photo)}"
+              alt="${esc(user.fullName)}"
+              loading="lazy"
+              referrerpolicy="no-referrer"
+              onload="this.parentElement.classList.add('has-photo')"
+              onerror="this.style.display='none';this.parentElement.classList.remove('has-photo')"
+            />` : ''}
         </div>`;
     }
 
@@ -1107,10 +1259,126 @@
       el.hidden = !message;
     }
 
-    function populateDivisions() {
-      $('departmentFilter').innerHTML =
-        '<option value="">All divisions</option>' +
-        DIVISIONS.map(d => `<option value="${esc(d)}">${esc(d)}</option>`).join('');
+    function dropdownOptionMarkup(option, currentValue) {
+      const active = option.value === currentValue;
+      return `
+        <button
+          class="filter-option ${active ? 'active' : ''}"
+          type="button"
+          role="option"
+          aria-selected="${active ? 'true' : 'false'}"
+          data-value="${esc(option.value)}"
+        >
+          <span>${esc(option.label)}</span>
+          <svg class="filter-option-check" viewBox="0 0 24 24">
+            <path d="m5 12 4 4L19 6"></path>
+          </svg>
+        </button>`;
+    }
+
+    function divisionOptions() {
+      return [
+        { value: '', label: 'All divisions' },
+        ...DIVISIONS.map(name => ({ value: name, label: name }))
+      ];
+    }
+
+    function closeAllDropdowns(exceptId = '') {
+      ['divisionDropdown','statusDropdown','sortDropdown'].forEach(id => {
+        if (id === exceptId) return;
+        const root = $(id);
+        if (!root) return;
+        root.classList.remove('open');
+        const menu = root.querySelector('.filter-menu');
+        const trigger = root.querySelector('.filter-trigger');
+        if (menu) menu.hidden = true;
+        if (trigger) trigger.setAttribute('aria-expanded','false');
+      });
+    }
+
+    function updateDropdownUI() {
+      $('divisionFilterLabel').textContent =
+        divisionOptions().find(o => o.value === filterState.division)?.label || 'All divisions';
+
+      $('statusFilterLabel').textContent =
+        STATUS_OPTIONS.find(o => o.value === filterState.status)?.label || 'All staff';
+
+      $('sortFilterLabel').textContent =
+        SORT_OPTIONS.find(o => o.value === filterState.sort)?.label || 'Name A–Z';
+
+      $('divisionFilterMenu').innerHTML =
+        divisionOptions().map(o => dropdownOptionMarkup(o, filterState.division)).join('');
+
+      $('statusFilterMenu').innerHTML =
+        STATUS_OPTIONS.map(o => dropdownOptionMarkup(o, filterState.status)).join('');
+
+      $('sortFilterMenu').innerHTML =
+        SORT_OPTIONS.map(o => dropdownOptionMarkup(o, filterState.sort)).join('');
+    }
+
+    function toggleDropdown(rootId) {
+      const root = $(rootId);
+      const menu = root.querySelector('.filter-menu');
+      const trigger = root.querySelector('.filter-trigger');
+      const willOpen = menu.hidden;
+
+      closeAllDropdowns(rootId);
+      menu.hidden = !willOpen;
+      root.classList.toggle('open', willOpen);
+      trigger.setAttribute('aria-expanded', willOpen ? 'true' : 'false');
+    }
+
+    function handleDropdownSelection(rootId, stateKey, value) {
+      filterState[stateKey] = value;
+      updateDropdownUI();
+
+      const root = $(rootId);
+      root.classList.remove('open');
+      root.querySelector('.filter-menu').hidden = true;
+      root.querySelector('.filter-trigger').setAttribute('aria-expanded','false');
+
+      render();
+    }
+
+    function initDropdowns() {
+      updateDropdownUI();
+
+      $('divisionFilterButton').addEventListener('click', event => {
+        event.stopPropagation();
+        toggleDropdown('divisionDropdown');
+      });
+
+      $('statusFilterButton').addEventListener('click', event => {
+        event.stopPropagation();
+        toggleDropdown('statusDropdown');
+      });
+
+      $('sortFilterButton').addEventListener('click', event => {
+        event.stopPropagation();
+        toggleDropdown('sortDropdown');
+      });
+
+      $('divisionFilterMenu').addEventListener('click', event => {
+        const option = event.target.closest('.filter-option');
+        if (!option) return;
+        handleDropdownSelection('divisionDropdown', 'division', option.dataset.value || '');
+      });
+
+      $('statusFilterMenu').addEventListener('click', event => {
+        const option = event.target.closest('.filter-option');
+        if (!option) return;
+        handleDropdownSelection('statusDropdown', 'status', option.dataset.value || '');
+      });
+
+      $('sortFilterMenu').addEventListener('click', event => {
+        const option = event.target.closest('.filter-option');
+        if (!option) return;
+        handleDropdownSelection('sortDropdown', 'sort', option.dataset.value || 'name');
+      });
+
+      document.addEventListener('click', event => {
+        if (!event.target.closest('.filter-dropdown')) closeAllDropdowns();
+      });
     }
 
     function statusChip(user) {
@@ -1182,7 +1450,7 @@
     }
 
     function sortUsers(users) {
-      const sort = $('sortSelect').value;
+      const sort = filterState.sort;
       const key = (u, field) => norm(u[field]);
 
       return users.sort((a,b) => {
@@ -1204,8 +1472,8 @@
 
     function render() {
       const q = norm($('searchInput').value);
-      const division = $('departmentFilter').value;
-      const status = $('statusFilter').value;
+      const division = filterState.division;
+      const status = filterState.status;
 
       const filtered = sortUsers(
         allUsers.filter(user =>
@@ -1421,9 +1689,11 @@
 
     function clearFilters() {
       $('searchInput').value = '';
-      $('departmentFilter').value = '';
-      $('statusFilter').value = '';
-      $('sortSelect').value = 'name';
+      filterState.division = '';
+      filterState.status = '';
+      filterState.sort = 'name';
+      updateDropdownUI();
+      closeAllDropdowns();
       render();
     }
 
@@ -1502,9 +1772,6 @@
     });
 
     $('searchInput').addEventListener('input', render);
-    $('departmentFilter').addEventListener('change', render);
-    $('statusFilter').addEventListener('change', render);
-    $('sortSelect').addEventListener('change', render);
     $('clearFiltersButton').addEventListener('click', clearFilters);
     $('gridViewButton').addEventListener('click', () => setView('grid'));
     $('listViewButton').addEventListener('click', () => setView('list'));
@@ -1543,7 +1810,7 @@
       }
     });
 
-    populateDivisions();
+    initDropdowns();
 
     firebase.auth().onAuthStateChanged(async user => {
       if (!user) {
