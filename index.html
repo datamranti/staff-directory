@@ -3,199 +3,588 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="theme-color" content="#0000ff" />
+  <meta name="theme-color" content="#f5f9ff" />
   <title>MRANTI Staff Directory</title>
 
-  <link rel="icon" type="image/png" sizes="512x512" href="./public/favicon-512.png?v=4" />
-  <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32.png?v=4" />
-  <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16.png?v=4" />
-  <link rel="shortcut icon" href="./public/favicon.ico?v=4" />
-  <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png?v=4" />
+  <link rel="icon" type="image/png" sizes="512x512" href="./public/favicon-512.png?v=6" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32.png?v=6" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16.png?v=6" />
+  <link rel="shortcut icon" href="./public/favicon.ico?v=6" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png?v=6" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
-  <link rel="stylesheet" href="./src/styles.css?v=4" />
-
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
   <style>
-    /*
-      Staff Directory V4 page-level fixes.
-      These overrides intentionally live here so only index.html + the n8n workflow
-      need to be replaced for this release.
-    */
-
-    /* Search | Department | Status | Sort | View */
-    .directory-toolbar {
-      grid-template-columns:
-        minmax(320px, 1.45fr)
-        minmax(175px, .58fr)
-        minmax(145px, .45fr)
-        minmax(150px, .48fr)
-        auto !important;
+    :root{
+      --canvas:#f5f9ff;
+      --surface:#ffffff;
+      --surface-soft:#f9fbff;
+      --ink:#101828;
+      --muted:#667085;
+      --muted2:#98a2b3;
+      --blue:#2463eb;
+      --blue-dark:#1e55cf;
+      --blue-soft:#edf4ff;
+      --line:#d5e5fb;
+      --line-soft:#e8eef7;
+      --success:#087a55;
+      --success-bg:#ecfdf3;
+      --success-line:#a6f4c5;
+      --resigned:#5d6b82;
+      --resigned-bg:#f2f4f7;
+      --resigned-line:#d0d5dd;
+      --danger:#b42318;
+      --shadow:0 18px 48px rgba(37,99,235,.08),0 2px 8px rgba(15,23,42,.03);
+      --radius:18px;
     }
 
-    /* The old JS still expects locationFilter to exist, so keep it hidden in DOM. */
-    .location-control,
-    .location-filter-compat {
-      display: none !important;
+    *{box-sizing:border-box}
+    html{min-height:100%;background:var(--canvas)}
+    body{
+      margin:0;
+      min-height:100vh;
+      font-family:Poppins,Arial,sans-serif;
+      color:var(--ink);
+      background:
+        radial-gradient(circle at 12% 2%,rgba(102,171,255,.13),transparent 26%),
+        linear-gradient(180deg,#f8fbff 0%,#f2f7ff 48%,#f7fbff 100%);
     }
+    [hidden]{display:none!important}
+    button,input,select{font:inherit}
+    button{cursor:pointer}
+    svg{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
-    /* The profile drawer must be ABOVE the sticky/floating navbar. */
-    .drawer-backdrop {
-      z-index: 1000 !important;
+    /* LOGIN — MATCHES CORE / CRM SIGN-IN SCREEN */
+    .login-screen{
+      min-height:100vh;
+      display:block;
+      padding:0;
+      background:
+        radial-gradient(circle at 92% 11%,rgba(37,99,235,.045),transparent 26%),
+        linear-gradient(180deg,#ffffff 0%,#fbfdff 100%);
     }
-
-    .staff-drawer {
-      z-index: 1010 !important;
+    .login-card{
+      width:min(420px,calc(100vw - 56px));
+      margin-left:clamp(28px,8.5vw,140px);
+      padding-top:clamp(96px,16vh,155px);
+      border:0;
+      border-radius:0;
+      background:transparent;
+      box-shadow:none;
     }
-
-    .drawer-head {
-      position: sticky !important;
-      top: 0 !important;
-      z-index: 5 !important;
-      padding-bottom: 12px;
-      background: rgba(255,255,255,.99);
+    .login-brand,
+    .login-icon,
+    .login-card .eyebrow,
+    .login-card > .divider,
+    .trust{
+      display:none;
     }
-
-    #closeDrawerButton {
-      position: relative;
-      z-index: 10;
-      pointer-events: auto !important;
+    .login-card h1{
+      margin:0;
+      color:#101828;
+      font-size:36px;
+      line-height:1.15;
+      font-weight:800;
+      letter-spacing:-1.35px;
     }
+    .login-card p{
+      max-width:405px;
+      margin:20px 0 0;
+      color:#667085;
+      font-size:15px;
+      line-height:1.55;
+      font-weight:400;
+    }
+    .signin{
+      width:100%;
+      min-height:57px;
+      margin-top:27px;
+      padding:0 18px;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:13px;
+      border:1px solid #cbd9eb;
+      border-radius:12px;
+      color:#101828;
+      background:#fff;
+      box-shadow:none;
+      font-size:14px;
+      font-weight:700;
+      transition:border-color .15s ease,background .15s ease,box-shadow .15s ease;
+    }
+    .signin:hover{
+      color:#101828;
+      background:#fbfdff;
+      border-color:#9fbae0;
+      box-shadow:0 5px 16px rgba(37,99,235,.06);
+    }
+    .signin:disabled{opacity:.55;cursor:wait}
+    .google-g{
+      width:20px;
+      height:20px;
+      flex:0 0 20px;
+      display:block;
+    }
+    .login-divider{
+      width:100%;
+      height:1px;
+      margin:22px 0 20px;
+      background:#d5deea;
+    }
+    .login-permissions{
+      display:flex;
+      flex-direction:column;
+      gap:13px;
+    }
+    .permission-row{
+      display:grid;
+      grid-template-columns:40px 1fr;
+      align-items:center;
+      gap:13px;
+      color:#596a83;
+      font-size:13px;
+      line-height:1.45;
+    }
+    .permission-icon{
+      width:40px;
+      height:40px;
+      display:grid;
+      place-items:center;
+      border-radius:11px;
+    }
+    .permission-icon.shield{
+      color:#2647ff;
+      background:#eef2ff;
+    }
+    .permission-icon.lock{
+      color:#00a5c8;
+      background:#eafcff;
+    }
+    .permission-icon svg{
+      width:18px;
+      height:18px;
+    }
+    .permission-row strong{
+      color:#344054;
+      font-weight:700;
+    }
+    .login-error{
+      display:none;
+      margin-top:13px;
+      padding:10px 12px;
+      border:1px solid #fecdd3;
+      border-radius:10px;
+      color:#b42318;
+      background:#fff1f2;
+      font-size:10px;
+      line-height:1.45;
+    }
+    .login-error.show{display:block}
+    /* CRM-MATCHED HEADER — NOT STICKY */
+    .topbar{
+      position:relative;
+      z-index:20;
+      padding:14px 28px 0;
+      background:transparent
+    }
+    .topbar-inner{
+      width:100%;
+      min-height:64px;
+      margin:0 auto;
+      padding:7px 12px 7px 14px;
+      display:grid;
+      grid-template-columns:minmax(260px,1fr) auto minmax(260px,1fr);
+      align-items:center;
+      gap:18px;
+      border:1px solid #cfe0f6;
+      border-radius:20px;
+      background:rgba(255,255,255,.97);
+      box-shadow:0 12px 34px rgba(37,99,235,.07)
+    }
+    .brand{display:flex;align-items:center;gap:13px;justify-self:start}
+    .brand img{width:155px;height:44px;object-fit:contain;object-position:left center}
+    .brand-label{color:var(--blue);font-size:11px;font-weight:800;letter-spacing:1.7px;text-transform:uppercase}
+    .nav-center{display:flex;justify-content:center}
+    .nav-link{
+      position:relative;
+      min-height:45px;
+      padding:0 12px;
+      display:flex;align-items:center;
+      color:#344054;
+      font-size:11px;font-weight:700
+    }
+    .nav-link::after{
+      content:"";
+      position:absolute;left:7px;right:7px;bottom:-7px;height:2px;
+      border-radius:999px;background:var(--blue)
+    }
+    .user-area{position:relative;display:flex;align-items:center;justify-self:end;gap:8px}
+    .refresh-btn{
+      width:40px;height:40px;display:grid;place-items:center;
+      border:1px solid var(--line);border-radius:12px;
+      background:#fff;color:#53627a
+    }
+    .refresh-btn:hover{color:var(--blue);background:#f8fbff}
+    .refresh-btn svg{width:17px;height:17px}
+    .refresh-btn.spinning svg{animation:spin .8s linear infinite}
+    @keyframes spin{to{transform:rotate(360deg)}}
+    .user-btn{
+      min-width:205px;height:40px;padding:3px 8px 3px 4px;
+      display:flex;align-items:center;gap:8px;
+      border:1px solid var(--line);border-radius:12px;
+      background:#fff;color:var(--ink);text-align:left
+    }
+    .user-avatar{
+      width:32px;height:32px;flex:0 0 32px;
+      display:grid;place-items:center;border-radius:9px;
+      color:#fff;background:#6aa634;font-size:12px
+    }
+    .user-copy{min-width:0;flex:1;display:flex;flex-direction:column}
+    .user-copy strong,.user-copy span{max-width:145px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .user-copy strong{font-size:9.5px}
+    .user-copy span{color:var(--muted);font-size:7.5px}
+    .user-btn .chev{width:12px;height:12px;color:#8491a5}
+    .user-menu{
+      position:absolute;top:calc(100% + 8px);right:0;width:230px;
+      overflow:hidden;border:1px solid var(--line);border-radius:12px;
+      background:#fff;box-shadow:var(--shadow)
+    }
+    .user-menu-head{padding:13px 14px;border-bottom:1px solid var(--line-soft)}
+    .user-menu-head strong{display:block;font-size:10px}
+    .user-menu-head span{display:block;margin-top:2px;color:var(--muted);font-size:8px}
+    .user-menu button{width:100%;padding:10px 14px;border:0;background:#fff;color:#475467;text-align:left;font-size:9px;font-weight:700}
+    .user-menu button:hover{background:#f8fbff;color:var(--blue)}
 
-    @media (max-width: 1050px) {
-      .directory-toolbar {
-        grid-template-columns: 1fr 1fr 1fr !important;
+    /* PAGE / CRM SPACING */
+    .page-shell{width:100%;padding:30px 36px 52px}
+    .hero{
+      min-height:130px;
+      padding:7px 2px 24px;
+      display:flex;align-items:flex-end;justify-content:space-between;gap:24px;
+      border-bottom:1px solid #cfe0f5
+    }
+    .hero h1{margin:6px 0 6px;font-size:34px;line-height:1.12;letter-spacing:-1.2px}
+    .hero p{margin:0;color:var(--muted);font-size:12px}
+    .stats{display:flex;gap:9px}
+    .stat{
+      min-width:115px;padding:11px 13px;
+      display:flex;align-items:baseline;gap:6px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:rgba(255,255,255,.88)
+    }
+    .stat strong{color:var(--blue);font-size:18px;font-weight:800}
+    .stat span{color:var(--muted);font-size:8px;font-weight:600}
+
+    .toolbar{
+      margin-top:16px;
+      display:grid;
+      grid-template-columns:minmax(360px,1.6fr) minmax(180px,.62fr) minmax(145px,.48fr) minmax(155px,.5fr) auto;
+      gap:9px
+    }
+    .search,.select,.view-toggle{
+      min-height:44px;
+      border:1px solid var(--line);
+      border-radius:12px;
+      background:#fff
+    }
+    .search{padding:0 12px;display:flex;align-items:center;gap:9px}
+    .search svg{width:16px;height:16px;color:#7a90b0}
+    .search input{min-width:0;flex:1;border:0;outline:0;background:transparent;color:var(--ink);font-size:10.5px}
+    .select{padding:6px 10px 5px;display:flex;flex-direction:column;justify-content:center}
+    .select span{color:var(--muted2);font-size:7px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+    .select select{width:100%;border:0;outline:0;background:transparent;color:#344054;font-size:9.5px;font-weight:650}
+    .view-toggle{display:flex;align-items:center;padding:3px}
+    .view-btn{width:38px;height:36px;border:0;border-radius:9px;color:#7c8ca5;background:transparent}
+    .view-btn svg{width:16px;height:16px}
+    .view-btn.active{color:var(--blue);background:var(--blue-soft)}
+
+    .panel{
+      margin-top:14px;
+      padding:14px;
+      border:1px solid #d8e5f7;
+      border-radius:18px;
+      background:rgba(255,255,255,.9);
+      box-shadow:0 10px 28px rgba(37,99,235,.055)
+    }
+    .panel-head{min-height:34px;padding:0 2px 10px;display:flex;align-items:center;justify-content:space-between}
+    .panel-label{color:var(--blue);font-size:9px;font-weight:800;letter-spacing:1.4px}
+    .result-count{margin-left:9px;color:var(--blue);font-size:9px;font-weight:700}
+    .clear-btn{border:0;background:transparent;color:var(--blue);font-size:9px;font-weight:700}
+    .banner{margin-bottom:11px;padding:9px 11px;border-radius:9px;font-size:9px}
+    .banner.error{color:#9e2f38;background:#fff0f1;border:1px solid #f6c7cb}
+    .banner.warning{color:#825500;background:#fff8e7;border:1px solid #f8dfa5}
+
+    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+    .grid.list-view{grid-template-columns:1fr}
+    .card{
+      min-width:0;
+      min-height:184px;
+      padding:15px;
+      display:flex;flex-direction:column;justify-content:space-between;gap:12px;
+      border:1px solid #dce7f5;
+      border-radius:15px;
+      background:#fff;
+      cursor:pointer;
+      transition:border-color .15s ease,box-shadow .15s ease,transform .15s ease
+    }
+    .card:hover{border-color:#a9cafa;box-shadow:0 10px 24px rgba(37,99,235,.075);transform:translateY(-1px)}
+    .card.resigned{background:#fdfdfd}
+    .card-main{display:flex;gap:12px}
+    .avatar-wrap{
+      width:48px;height:48px;flex:0 0 48px;
+      position:relative;overflow:hidden;
+      border:1px solid #bfd7fb;
+      border-radius:14px;
+      background:#edf4ff
+    }
+    .avatar-photo{
+      position:absolute;inset:0;width:100%;height:100%;
+      object-fit:cover;
+      background:#edf4ff
+    }
+    .avatar-fallback{
+      position:absolute;inset:0;
+      display:grid;place-items:center;
+      color:var(--blue);font-size:14px;font-weight:800
+    }
+    .avatar-wrap.has-photo .avatar-fallback{display:none}
+    .staff-copy{min-width:0;flex:1}
+    .name-row{display:flex;align-items:flex-start;justify-content:space-between;gap:7px}
+    .name-row h2{
+      min-width:0;margin:0;
+      color:var(--ink);font-size:11px;font-weight:800;line-height:1.35
+    }
+    .chips{max-width:145px;display:flex;align-items:flex-end;justify-content:flex-end;gap:4px;flex-wrap:wrap}
+    .chip{
+      max-width:145px;padding:3px 6px;
+      overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+      border-radius:999px;font-size:6.7px;font-weight:800
+    }
+    .chip.department{color:#1d4ed8;background:#eff6ff;border:1px solid #bfdbfe}
+    .chip.active{color:var(--success);background:var(--success-bg);border:1px solid var(--success-line)}
+    .chip.resigned{color:var(--resigned);background:var(--resigned-bg);border:1px solid var(--resigned-line)}
+    .title{margin:4px 0 9px;color:#667085;font-size:8.6px;line-height:1.45}
+    .contact{margin-top:5px;display:flex;align-items:center;gap:6px;color:#667085;font-size:8px;line-height:1.4}
+    .contact svg{width:12px;height:12px;flex:0 0 12px;color:#6684b0}
+    .contact a{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#2563eb;text-decoration:none}
+    .actions{padding-top:10px;display:flex;align-items:center;gap:6px;border-top:1px solid #edf2f8}
+    .action{
+      min-height:28px;padding:0 9px;
+      border:1px solid #d5e4f7;border-radius:8px;
+      color:#315072;background:#fff;font-size:7px;font-weight:700
+    }
+    .open{
+      margin-left:auto;width:29px;height:29px;
+      display:grid;place-items:center;border:0;border-radius:8px;
+      color:#6380a6;background:#f4f8ff
+    }
+    .open svg{width:13px;height:13px}
+    .grid.list-view .card{min-height:92px;flex-direction:row;align-items:center}
+    .grid.list-view .card-main{min-width:0;flex:1;align-items:center}
+    .grid.list-view .actions{padding:0 0 0 11px;border-top:0;border-left:1px solid #edf2f8}
+
+    .empty{padding:68px 20px;text-align:center;color:var(--muted);font-size:10px}
+    .empty h2{margin:0 0 4px;color:var(--ink);font-size:14px}
+
+    /* PROFILE DRAWER ABOVE EVERYTHING */
+    .backdrop{
+      position:fixed;inset:0;z-index:1000;
+      background:rgba(15,23,42,.18);
+      backdrop-filter:blur(2px)
+    }
+    .drawer{
+      position:fixed;top:0;right:0;z-index:1010;
+      width:min(420px,92vw);height:100vh;overflow-y:auto;
+      transform:translateX(105%);
+      background:#fff;border-left:1px solid var(--line);
+      box-shadow:-18px 0 50px rgba(15,23,42,.11);
+      transition:transform .2s ease
+    }
+    .drawer.open{transform:translateX(0)}
+    .drawer-head{
+      position:sticky;top:0;z-index:5;
+      min-height:62px;padding:12px 16px;
+      display:flex;align-items:center;justify-content:space-between;
+      border-bottom:1px solid var(--line-soft);
+      background:#fff
+    }
+    .drawer-head span{color:var(--blue);font-size:9px;font-weight:800;letter-spacing:1.4px}
+    .close{
+      width:38px;height:38px;display:grid;place-items:center;
+      border:1px solid var(--line);border-radius:11px;
+      color:#5d6f8a;background:#fff
+    }
+    .close:hover{color:var(--blue);background:#f8fbff}
+    .close svg{width:17px;height:17px}
+    .drawer-body{padding:0 20px 24px}
+    .drawer-profile{padding:22px 2px 25px;text-align:center;border-bottom:1px solid var(--line-soft)}
+    .drawer-avatar{
+      width:76px;height:76px;margin:0 auto 14px;
+      position:relative;overflow:hidden;
+      border:1px solid #bfd7fb;border-radius:21px;background:#edf4ff
+    }
+    .drawer-avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+    .drawer-avatar span{position:absolute;inset:0;display:grid;place-items:center;color:var(--blue);font-size:19px;font-weight:800}
+    .drawer-avatar.has-photo span{display:none}
+    .drawer-profile h2{margin:0;font-size:18px;line-height:1.4;letter-spacing:-.35px}
+    .drawer-profile p{margin:4px 0 9px;color:var(--muted);font-size:9px}
+    .drawer-chips{display:flex;justify-content:center;gap:5px;flex-wrap:wrap}
+    .details{padding:16px 0}
+    .detail{
+      padding:9px 2px;
+      display:grid;grid-template-columns:105px 1fr;gap:12px;
+      border-bottom:1px solid #f0f4f8
+    }
+    .detail span{color:var(--muted2);font-size:8px;font-weight:600}
+    .detail strong{min-width:0;color:#344054;font-size:8.7px;font-weight:650;word-break:break-word}
+    .detail a{color:var(--blue);text-decoration:none}
+    .drawer-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
+    .drawer-actions a,.drawer-actions button{
+      min-height:41px;display:flex;align-items:center;justify-content:center;
+      border-radius:11px;text-decoration:none;font-size:8.5px;font-weight:700
+    }
+    .primary{border:0;color:#fff;background:var(--blue)}
+    .secondary{border:1px solid #bcd4fa;color:var(--blue);background:#fff}
+
+    .toast{
+      position:fixed;left:50%;bottom:24px;z-index:1200;
+      padding:9px 13px;transform:translate(-50%,14px);
+      opacity:0;pointer-events:none;border-radius:9px;
+      color:#fff;background:#16233a;font-size:8.5px;font-weight:650;
+      transition:.16s ease
+    }
+    .toast.show{transform:translate(-50%,0);opacity:1}
+
+    @media(max-width:1300px){
+      .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+    }
+    @media(max-width:1050px){
+      .topbar-inner{grid-template-columns:1fr auto}
+      .nav-center{display:none}
+      .toolbar{grid-template-columns:1fr 1fr 1fr}
+      .search{grid-column:1/-1}
+      .view-toggle{justify-self:stretch}
+      .view-btn{flex:1}
+      .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+    }
+    @media(max-width:760px){
+      .topbar{padding:8px 10px 0}
+      .topbar-inner{min-height:56px;padding:7px 9px;border-radius:16px}
+      .brand img{width:118px;height:36px}
+      .brand-label,.divider{display:none}
+      .user-btn{min-width:40px;width:40px;padding:3px}
+      .user-copy,.user-btn .chev{display:none}
+      .page-shell{padding:24px 12px 40px}
+      .hero{min-height:0;align-items:flex-start;flex-direction:column}
+      .stats{width:100%}
+      .stat{flex:1}
+      .toolbar{grid-template-columns:1fr 1fr}
+      .search{grid-column:1/-1}
+      .view-toggle{grid-column:1/-1}
+      .grid{grid-template-columns:1fr}
+      .grid.list-view .card{align-items:stretch;flex-direction:column}
+      .grid.list-view .actions{width:100%;padding:10px 0 0;border-left:0;border-top:1px solid #edf2f8}
+    }
+    @media(max-width:520px){
+      .login-screen{padding:14px}
+      .login-card{padding:27px 21px;border-radius:20px}
+      .login-card h1{font-size:30px}
+      .hero h1{font-size:29px}
+      .stats{flex-direction:column}
+      .toolbar{grid-template-columns:1fr}
+      .search,.select,.view-toggle{grid-column:1!important}
+      .panel{padding:10px}
+      .name-row{flex-direction:column}
+      .chips{align-items:flex-start;justify-content:flex-start}
+      .drawer-actions{grid-template-columns:1fr}
+    }
+    @media(max-width:520px){
+      .login-screen{padding:0}
+      .login-card{
+        width:calc(100vw - 40px);
+        margin-left:20px;
+        padding-top:88px;
       }
-
-      .search-control {
-        grid-column: 1 / -1;
-      }
-
-      .view-toggle {
-        justify-self: stretch;
-      }
+      .login-card h1{font-size:33px}
+      .login-card p{font-size:14px}
+      .signin{min-height:54px;font-size:13px}
+      .permission-row{grid-template-columns:38px 1fr;font-size:12px}
+      .permission-icon{width:38px;height:38px}
     }
 
-    @media (max-width: 760px) {
-      .directory-toolbar {
-        grid-template-columns: 1fr 1fr !important;
-      }
-
-      .search-control {
-        grid-column: 1 / -1;
-      }
-
-      .view-toggle {
-        grid-column: 1 / -1;
-      }
-    }
-
-    @media (max-width: 520px) {
-      .directory-toolbar {
-        grid-template-columns: 1fr !important;
-      }
-
-      .search-control,
-      .select-control,
-      .view-toggle {
-        grid-column: 1 !important;
-      }
-    }
   </style>
 </head>
 
 <body>
-  <div id="loginScreen" class="login-screen" aria-hidden="false">
-    <div class="login-orb login-orb-one"></div>
-    <div class="login-orb login-orb-two"></div>
-
+  <div id="loginScreen" class="login-screen">
     <main class="login-card">
-      <div class="login-brand-row">
-        <img
-          class="mranti-logo login-logo"
-          src="https://cdn.prod.website-files.com/6719e3902a71ea8154ba371d/6996a2c470a01e3f32ffa080_M30.png"
-          alt="MRANTI 30 Years"
-        />
-        <span class="brand-divider"></span>
-        <span class="directory-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-          </svg>
-        </span>
-      </div>
+      <h1>Welcome back</h1>
+      <p>Sign in with your MRANTI Google Workspace account to continue.</p>
 
-      <div class="login-kicker">MRANTI INTERNAL WORKSPACE</div>
-      <h1>Staff Directory</h1>
-      <p class="login-copy">Find the right colleague, role and contact details across MRANTI.</p>
-
-      <button id="signInButton" class="primary-button sign-in-button" type="button">
-        <svg viewBox="0 0 24 24" aria-hidden="true">
-          <path d="M21.35 11.1h-9.18v2.98h5.29c-.23 1.53-1.76 4.49-5.29 4.49-3.19 0-5.79-2.64-5.79-5.89s2.6-5.89 5.79-5.89c1.82 0 3.03.78 3.73 1.45l2.55-2.49C16.82 4.2 14.7 3.25 12.17 3.25 7.09 3.25 3 7.44 3 12.68s4.09 9.43 9.17 9.43c5.29 0 8.8-3.81 8.8-9.17 0-.62-.07-1.21-.15-1.84z"></path>
+      <button id="signInButton" class="signin" type="button">
+        <svg class="google-g" viewBox="0 0 48 48" aria-hidden="true">
+          <path fill="#FFC107" d="M43.6 20H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.2 6.1 29.4 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-4z"/>
+          <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.2 18.9 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.2 6.1 29.4 4 24 4c-7.7 0-14.4 4.4-17.7 10.7z"/>
+          <path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.5-5.2l-6.2-5.2C29.3 35.2 26.8 36 24 36c-5.3 0-9.7-3.3-11.3-7.9l-6.5 5C9.5 39.5 16.2 44 24 44z"/>
+          <path fill="#1976D2" d="M43.6 20H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.3 5.6l.1-.1 6.2 5.2C36.9 39.1 44 34 44 24c0-1.3-.1-2.7-.4-4z"/>
         </svg>
-        Continue with Google
+        <span>Continue with Google</span>
       </button>
 
-      <div id="loginError" class="login-error" role="alert"></div>
-      <div class="login-trust">
-        <span></span>
-        Available to authenticated @mranti.my accounts only.
+      <div id="loginError" class="login-error"></div>
+
+      <div class="login-divider"></div>
+
+      <div class="login-permissions">
+        <div class="permission-row">
+          <span class="permission-icon shield" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><path d="M12 3 19 6v5c0 4.8-2.8 8.2-7 10-4.2-1.8-7-5.2-7-10V6l7-3Z"></path></svg>
+          </span>
+          <span>Authorised <strong>@mranti.my</strong> accounts only.</span>
+        </div>
+
+        <div class="permission-row">
+          <span class="permission-icon lock" aria-hidden="true">
+            <svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+          </span>
+          <span>Access follows your organisation account and approved Workspace permissions.</span>
+        </div>
       </div>
     </main>
   </div>
 
-  <div id="appScreen" class="app-screen" hidden>
+  <div id="appScreen" hidden>
     <header class="topbar">
       <div class="topbar-inner">
-        <div class="brand-group">
-          <img
-            class="mranti-logo"
-            src="https://cdn.prod.website-files.com/6719e3902a71ea8154ba371d/6996a2c470a01e3f32ffa080_M30.png"
-            alt="MRANTI 30 Years"
-          />
-          <span class="brand-divider"></span>
-          <div class="product-brand">
-            <span>STAFF DIRECTORY</span>
-          </div>
+        <div class="brand">
+          <img src="https://cdn.prod.website-files.com/6719e3902a71ea8154ba371d/6996a2c470a01e3f32ffa080_M30.png" alt="MRANTI 30 Years" />
+          <span class="divider"></span>
+          <span class="brand-label">STAFF DIRECTORY</span>
         </div>
 
-        <nav class="standalone-nav" aria-label="Staff Directory navigation">
-          <span class="standalone-nav-item active">Staff Directory</span>
+        <nav class="nav-center" aria-label="Staff Directory navigation">
+          <span class="nav-link">Staff Directory</span>
         </nav>
 
         <div class="user-area">
-          <button
-            id="refreshButton"
-            class="icon-button"
-            type="button"
-            title="Refresh directory"
-            aria-label="Refresh directory"
-          >
-            <svg viewBox="0 0 24 24">
-              <path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 4v5h5"></path>
-              <path d="M4 13a8.1 8.1 0 0 0 15.5 2M20 20v-5h-5"></path>
-            </svg>
+          <button id="refreshButton" class="refresh-btn" type="button" title="Refresh directory" aria-label="Refresh directory">
+            <svg viewBox="0 0 24 24"><path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 4v5h5"></path><path d="M4 13a8.1 8.1 0 0 0 15.5 2M20 20v-5h-5"></path></svg>
           </button>
 
-          <button id="userButton" class="user-button" type="button" aria-expanded="false">
-            <img id="userPhoto" class="user-photo" alt="" />
-            <span id="userInitial" class="user-initial"></span>
-
+          <button id="userButton" class="user-btn" type="button" aria-expanded="false">
+            <span id="userInitial" class="user-avatar">MR</span>
             <span class="user-copy">
-              <strong id="userName"></strong>
-              <small id="userEmail"></small>
+              <strong id="userName">MRANTI Staff</strong>
+              <span id="userEmail"></span>
             </span>
-
-            <svg class="chevron" viewBox="0 0 24 24">
-              <path d="m7 10 5 5 5-5"></path>
-            </svg>
+            <svg class="chev" viewBox="0 0 24 24"><path d="m7 10 5 5 5-5"></path></svg>
           </button>
 
           <div id="userMenu" class="user-menu" hidden>
@@ -214,52 +603,28 @@
         <div>
           <div class="eyebrow">MRANTI STAFF DIRECTORY</div>
           <h1>Staff Directory</h1>
-          <p>Find MRANTI colleagues by name, role, department, email or phone.</p>
+          <p>Find MRANTI colleagues by name, role, division, email or phone.</p>
         </div>
 
-        <div class="hero-meta" aria-label="Directory summary">
-          <div class="meta-pill">
-            <strong id="activeCount">—</strong>
-            <span>Active staff</span>
-          </div>
-
-          <div class="meta-pill">
-            <strong id="resignedCount">—</strong>
-            <span>Resigned staff</span>
-          </div>
-
-          <div class="meta-pill">
-            <strong id="departmentCount">14</strong>
-            <span>Departments</span>
-          </div>
+        <div class="stats">
+          <div class="stat"><strong id="activeCount">—</strong><span>Active staff</span></div>
+          <div class="stat"><strong id="resignedCount">—</strong><span>Resigned staff</span></div>
+          <div class="stat"><strong id="divisionCount">16</strong><span>Divisions</span></div>
         </div>
       </section>
 
-      <section class="directory-toolbar" aria-label="Directory controls">
-        <label class="search-control">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <circle cx="11" cy="11" r="7"></circle>
-            <path d="m20 20-3.5-3.5"></path>
-          </svg>
-
-          <input
-            id="searchInput"
-            type="search"
-            autocomplete="off"
-            placeholder="Search name, role, department, email or phone…"
-          />
-
-          <kbd>/</kbd>
+      <section class="toolbar">
+        <label class="search">
+          <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          <input id="searchInput" type="search" autocomplete="off" placeholder="Search name, role, division, email or phone…" />
         </label>
 
-        <label class="select-control">
-          <span>Department</span>
-          <select id="departmentFilter">
-            <option value="">All departments</option>
-          </select>
+        <label class="select">
+          <span>Division</span>
+          <select id="departmentFilter"></select>
         </label>
 
-        <label class="select-control status-control">
+        <label class="select">
           <span>Status</span>
           <select id="statusFilter">
             <option value="">All staff</option>
@@ -268,174 +633,579 @@
           </select>
         </label>
 
-        <label class="select-control sort-control">
+        <label class="select">
           <span>Sort</span>
           <select id="sortSelect">
             <option value="name">Name A–Z</option>
-            <option value="department">Department</option>
+            <option value="department">Division</option>
             <option value="title">Job title</option>
             <option value="status">Status</option>
           </select>
         </label>
 
-        <div class="view-toggle" role="group" aria-label="Directory view">
-          <button id="gridViewButton" class="view-button active" type="button" aria-label="Grid view">
-            <svg viewBox="0 0 24 24">
-              <rect x="3" y="3" width="7" height="7" rx="1"></rect>
-              <rect x="14" y="3" width="7" height="7" rx="1"></rect>
-              <rect x="3" y="14" width="7" height="7" rx="1"></rect>
-              <rect x="14" y="14" width="7" height="7" rx="1"></rect>
-            </svg>
+        <div class="view-toggle">
+          <button id="gridViewButton" class="view-btn active" type="button" aria-label="Grid view">
+            <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect></svg>
           </button>
-
-          <button id="listViewButton" class="view-button" type="button" aria-label="List view">
-            <svg viewBox="0 0 24 24">
-              <path d="M8 6h13M8 12h13M8 18h13"></path>
-              <path d="M3 6h.01M3 12h.01M3 18h.01"></path>
-            </svg>
+          <button id="listViewButton" class="view-btn" type="button" aria-label="List view">
+            <svg viewBox="0 0 24 24"><path d="M8 6h13M8 12h13M8 18h13"></path><path d="M3 6h.01M3 12h.01M3 18h.01"></path></svg>
           </button>
         </div>
       </section>
 
-      <!--
-        Compatibility-only hidden select:
-        src/directory.js still references locationFilter.
-        It remains in DOM but no Location filter is shown to the user.
-      -->
-      <div class="location-filter-compat" aria-hidden="true">
-        <select id="locationFilter" tabindex="-1">
-          <option value="">All locations</option>
-        </select>
-      </div>
-
-      <section class="directory-panel">
+      <section class="panel">
         <div class="panel-head">
           <div>
             <span class="panel-label">STAFF MEMBERS</span>
             <span id="resultCount" class="result-count"></span>
           </div>
-
-          <button id="clearFiltersButton" class="text-button" type="button">
-            Clear filters
-          </button>
+          <button id="clearFiltersButton" class="clear-btn" type="button">Clear filters</button>
         </div>
 
-        <div id="statusBanner" class="status-banner" hidden></div>
-        <div id="skeletonGrid" class="staff-grid skeleton-grid" aria-hidden="true"></div>
-        <div id="staffGrid" class="staff-grid"></div>
+        <div id="statusBanner" class="banner" hidden></div>
+        <div id="staffGrid" class="grid"></div>
 
-        <div id="emptyState" class="empty-state" hidden>
-          <span class="empty-icon">
-            <svg viewBox="0 0 24 24">
-              <circle cx="11" cy="11" r="7"></circle>
-              <path d="m20 20-3.5-3.5"></path>
-            </svg>
-          </span>
-
+        <div id="emptyState" class="empty" hidden>
           <h2>No staff found</h2>
-          <p>Try another name, department or status.</p>
-          <button id="emptyClearButton" class="secondary-button" type="button">
-            Clear filters
-          </button>
+          <div>Try another name, division or status.</div>
         </div>
       </section>
     </main>
-
-    <div id="drawerBackdrop" class="drawer-backdrop" hidden></div>
-
-    <aside
-      id="staffDrawer"
-      class="staff-drawer"
-      aria-hidden="true"
-      aria-label="Staff profile"
-    >
-      <div class="drawer-head">
-        <span class="drawer-eyebrow">STAFF PROFILE</span>
-
-        <button
-          id="closeDrawerButton"
-          class="icon-button"
-          type="button"
-          aria-label="Close profile"
-        >
-          <svg viewBox="0 0 24 24">
-            <path d="M18 6 6 18M6 6l12 12"></path>
-          </svg>
-        </button>
-      </div>
-
-      <div id="drawerContent"></div>
-    </aside>
-
-    <div id="toast" class="toast" role="status" aria-live="polite"></div>
   </div>
 
-  <script type="module" src="./src/app.js?v=4"></script>
+  <div id="drawerBackdrop" class="backdrop" hidden></div>
+
+  <aside id="staffDrawer" class="drawer" aria-hidden="true">
+    <div class="drawer-head">
+      <span>STAFF PROFILE</span>
+      <button id="closeDrawerButton" class="close" type="button" aria-label="Close profile">
+        <svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+      </button>
+    </div>
+    <div id="drawerContent" class="drawer-body"></div>
+  </aside>
+
+  <div id="toast" class="toast"></div>
 
   <script>
-    /*
-      Enforce the approved MRANTI department taxonomy in the dropdown.
-      The existing directory module may repopulate the select from returned users,
-      so this observer normalises the options back to the approved list.
-    */
-    (() => {
-      const approvedDepartments = [
-        'Strategy',
-        'Finance',
-        'Ecosystem',
-        'Human Resource',
-        'Technology',
-        'Operations',
-        'Risk & Integrity',
-        'Legal',
-        'Strategic Procurement',
-        'Strategic Communication',
-        'Business Development',
-        "CEO'S Office",
-        "Chairman's Office",
-        'Secreterial'
-      ];
+    const API_URL = 'https://mrantidata.app.n8n.cloud/webhook/staff-directory-data';
+    const ALLOWED_DOMAIN = 'mranti.my';
+    const CACHE_KEY = 'mranti_staff_directory_cache_v6';
 
-      const select = document.getElementById('departmentFilter');
-      if (!select) return;
+    const FIREBASE_CONFIG = {
+      apiKey: 'AIzaSyDXz0gL67r9BafTg8nL6VdHYdw1tfcxhto',
+      authDomain: 'mranticrm.firebaseapp.com',
+      projectId: 'mranticrm',
+      storageBucket: 'mranticrm.firebasestorage.app',
+      messagingSenderId: '314966643466',
+      appId: '1:314966643466:web:aff9ad95262d1df8f960f3'
+    };
 
-      const expectedHtml = () =>
-        '<option value="">All departments</option>' +
-        approvedDepartments
-          .map(name => `<option value="${name.replace(/"/g, '&quot;')}">${name}</option>`)
-          .join('');
+    const DIVISIONS = [
+      'Strategy',
+      'Finance',
+      'Ecosystem',
+      'Human Resource',
+      'Technology',
+      'Operations',
+      'Risk & Integrity',
+      'Legal',
+      'Strategic Procurement',
+      'Strategic Communication',
+      'Business Development',
+      "CEO'S Office",
+      "Chairman's Office",
+      'Secreterial',
+      'Land',
+      'Others'
+    ];
 
-      let applying = false;
+    const $ = id => document.getElementById(id);
 
-      function enforceApprovedDepartments() {
-        if (applying) return;
+    let allUsers = [];
+    let currentView = 'grid';
+    let refreshInProgress = false;
 
-        const currentValue = select.value;
-        const currentNames = Array.from(select.options)
-          .slice(1)
-          .map(option => option.textContent);
+    function esc(value) {
+      return String(value ?? '')
+        .replace(/&/g,'&amp;')
+        .replace(/</g,'&lt;')
+        .replace(/>/g,'&gt;')
+        .replace(/"/g,'&quot;')
+        .replace(/'/g,'&#039;');
+    }
 
-        const same =
-          currentNames.length === approvedDepartments.length &&
-          currentNames.every((name, index) => name === approvedDepartments[index]);
+    function norm(value) {
+      return String(value ?? '')
+        .toLowerCase()
+        .normalize('NFD')
+        .replace(/[\u0300-\u036f]/g,'')
+        .replace(/&/g,' and ')
+        .replace(/[^a-z0-9\s@._+/'-]/g,' ')
+        .replace(/\s+/g,' ')
+        .trim();
+    }
 
-        if (same) return;
+    function initials(name) {
+      const parts = String(name || '').trim().split(/\s+/).filter(Boolean);
+      if (!parts.length) return 'MR';
+      if (parts.length === 1) return parts[0].slice(0,2).toUpperCase();
+      return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+    }
 
-        applying = true;
-        select.innerHTML = expectedHtml();
+    function avatarMarkup(user, drawer = false) {
+      const cls = drawer ? 'drawer-avatar' : 'avatar-wrap';
+      const photo = String(user.thumbnailPhotoUrl || '').trim();
+      const initial = esc(initials(user.fullName));
 
-        if (approvedDepartments.includes(currentValue)) {
-          select.value = currentValue;
-        }
-
-        applying = false;
+      if (!photo) {
+        return `<div class="${cls}"><span class="${drawer ? '' : 'avatar-fallback'}">${initial}</span></div>`;
       }
 
-      enforceApprovedDepartments();
+      if (drawer) {
+        return `
+          <div class="drawer-avatar">
+            <span>${initial}</span>
+            <img
+              src="${esc(photo)}"
+              alt="${esc(user.fullName)}"
+              referrerpolicy="no-referrer"
+              onload="this.parentElement.classList.add('has-photo')"
+              onerror="this.remove()"
+            />
+          </div>`;
+      }
 
-      const observer = new MutationObserver(enforceApprovedDepartments);
-      observer.observe(select, { childList: true, subtree: true });
-    })();
+      return `
+        <div class="avatar-wrap">
+          <span class="avatar-fallback">${initial}</span>
+          <img
+            class="avatar-photo"
+            src="${esc(photo)}"
+            alt="${esc(user.fullName)}"
+            loading="lazy"
+            referrerpolicy="no-referrer"
+            onload="this.parentElement.classList.add('has-photo')"
+            onerror="this.remove()"
+          />
+        </div>`;
+    }
+
+    function toast(message) {
+      $('toast').textContent = message;
+      $('toast').classList.add('show');
+      clearTimeout(toast.timer);
+      toast.timer = setTimeout(() => $('toast').classList.remove('show'), 2000);
+    }
+
+    function showBanner(message = '', type = 'error') {
+      const el = $('statusBanner');
+      el.textContent = message;
+      el.className = `banner ${type}`;
+      el.hidden = !message;
+    }
+
+    function populateDivisions() {
+      $('departmentFilter').innerHTML =
+        '<option value="">All divisions</option>' +
+        DIVISIONS.map(d => `<option value="${esc(d)}">${esc(d)}</option>`).join('');
+    }
+
+    function statusChip(user) {
+      const resigned = user.status === 'Resigned';
+      return `<span class="chip ${resigned ? 'resigned' : 'active'}">${resigned ? 'Resigned' : 'Active'}</span>`;
+    }
+
+    function divisionChip(user) {
+      return user.department
+        ? `<span class="chip department">${esc(user.department)}</span>`
+        : '';
+    }
+
+    function card(user) {
+      const email = user.primaryEmail
+        ? `<div class="contact">
+             <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg>
+             <a href="mailto:${esc(user.primaryEmail)}" onclick="event.stopPropagation()">${esc(user.primaryEmail)}</a>
+           </div>`
+        : '';
+
+      const phone = user.phoneNumbers
+        ? `<div class="contact">
+             <svg viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6A19.79 19.79 0 0 1 2.12 4.18 2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72"></path></svg>
+             <span>${esc(user.phoneNumbers)}</span>
+           </div>`
+        : '';
+
+      return `
+        <article class="card ${user.status === 'Resigned' ? 'resigned' : ''}" data-id="${esc(user.id || user.primaryEmail)}">
+          <div class="card-main">
+            ${avatarMarkup(user)}
+            <div class="staff-copy">
+              <div class="name-row">
+                <h2>${esc(user.fullName || 'Unnamed staff')}</h2>
+                <div class="chips">${divisionChip(user)}${statusChip(user)}</div>
+              </div>
+              <div class="title">${esc(user.jobTitle || user.department || 'MRANTI Staff')}</div>
+              ${email}
+              ${phone}
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="action" type="button" data-action="email" data-email="${esc(user.primaryEmail)}">Email</button>
+            <button class="action" type="button" data-action="copy" data-email="${esc(user.primaryEmail)}">Copy email</button>
+            <button class="open" type="button" aria-label="Open profile">
+              <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg>
+            </button>
+          </div>
+        </article>`;
+    }
+
+    function searchText(user) {
+      return norm([
+        user.fullName,
+        user.givenName,
+        user.familyName,
+        user.primaryEmail,
+        user.jobTitle,
+        user.department,
+        user.rawDepartment,
+        user.organisationUnit,
+        user.phoneNumbers,
+        user.aliases,
+        user.additionalEmails,
+        user.status
+      ].join(' '));
+    }
+
+    function sortUsers(users) {
+      const sort = $('sortSelect').value;
+      const key = (u, field) => norm(u[field]);
+
+      return users.sort((a,b) => {
+        if (sort === 'department') {
+          return key(a,'department').localeCompare(key(b,'department')) ||
+                 key(a,'fullName').localeCompare(key(b,'fullName'));
+        }
+        if (sort === 'title') {
+          return key(a,'jobTitle').localeCompare(key(b,'jobTitle')) ||
+                 key(a,'fullName').localeCompare(key(b,'fullName'));
+        }
+        if (sort === 'status') {
+          return key(a,'status').localeCompare(key(b,'status')) ||
+                 key(a,'fullName').localeCompare(key(b,'fullName'));
+        }
+        return key(a,'fullName').localeCompare(key(b,'fullName'));
+      });
+    }
+
+    function render() {
+      const q = norm($('searchInput').value);
+      const division = $('departmentFilter').value;
+      const status = $('statusFilter').value;
+
+      const filtered = sortUsers(
+        allUsers.filter(user =>
+          (!division || user.department === division) &&
+          (!status || user.status === status) &&
+          (!q || searchText(user).includes(q))
+        )
+      );
+
+      $('staffGrid').classList.toggle('list-view', currentView === 'list');
+      $('staffGrid').innerHTML = filtered.map(card).join('');
+      $('resultCount').textContent = `${filtered.length} ${filtered.length === 1 ? 'person' : 'people'}`;
+      $('emptyState').hidden = filtered.length > 0;
+      $('staffGrid').hidden = filtered.length === 0;
+    }
+
+    function setData(data) {
+      allUsers = Array.isArray(data?.users) ? data.users.slice() : [];
+
+      $('activeCount').textContent =
+        Number.isFinite(Number(data?.activeUsers))
+          ? Number(data.activeUsers)
+          : allUsers.filter(u => u.status === 'Active').length;
+
+      $('resignedCount').textContent =
+        Number.isFinite(Number(data?.resignedUsers))
+          ? Number(data.resignedUsers)
+          : allUsers.filter(u => u.status === 'Resigned').length;
+
+      $('divisionCount').textContent = DIVISIONS.length;
+      render();
+    }
+
+    function getCached() {
+      try {
+        const parsed = JSON.parse(sessionStorage.getItem(CACHE_KEY) || 'null');
+        return parsed?.data ? parsed : null;
+      } catch {
+        return null;
+      }
+    }
+
+    function setCached(data) {
+      try {
+        sessionStorage.setItem(CACHE_KEY, JSON.stringify({ savedAt: Date.now(), data }));
+      } catch {}
+    }
+
+    async function fetchDirectory(forceTokenRefresh = false) {
+      const user = firebase.auth().currentUser;
+      if (!user) throw new Error('Please sign in again.');
+
+      const idToken = await user.getIdToken(forceTokenRefresh);
+
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        cache: 'no-store',
+        headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+        body: JSON.stringify({
+          idToken,
+          action: 'list',
+          requestedAt: new Date().toISOString()
+        })
+      });
+
+      const body = await response.text();
+      let data;
+
+      try {
+        data = JSON.parse(body);
+      } catch {
+        throw new Error(body || 'The Staff Directory service returned an invalid response.');
+      }
+
+      if (!response.ok || data.success === false) {
+        throw new Error(data.error || data.message || 'Unable to load the Staff Directory.');
+      }
+
+      setCached(data);
+      return data;
+    }
+
+    async function loadDirectory({ force = false } = {}) {
+      if (refreshInProgress) return;
+
+      const cached = getCached();
+      if (!force && cached?.data) setData(cached.data);
+
+      refreshInProgress = true;
+      $('refreshButton').classList.add('spinning');
+      showBanner('');
+
+      try {
+        const data = await fetchDirectory(force);
+        setData(data);
+      } catch (error) {
+        if (!cached?.data) {
+          setData({ users: [], activeUsers: 0, resignedUsers: 0 });
+          showBanner(error.message || 'Unable to load the Staff Directory.', 'error');
+        } else {
+          showBanner(`Live refresh failed. Showing the last loaded directory. ${error.message}`, 'warning');
+        }
+      } finally {
+        refreshInProgress = false;
+        $('refreshButton').classList.remove('spinning');
+      }
+    }
+
+    function closeDrawer() {
+      $('staffDrawer').classList.remove('open');
+      $('staffDrawer').setAttribute('aria-hidden', 'true');
+      $('drawerBackdrop').hidden = true;
+    }
+
+    function openDrawer(user) {
+      if (!user) return;
+
+      const rows = [
+        ['Status', user.status],
+        ['Email', user.primaryEmail, 'email'],
+        ['Phone', user.phoneNumbers],
+        ['Division', user.department],
+        ['Organisation unit', user.organisationUnit],
+        ['Source department', user.rawDepartment]
+      ].filter(([,value]) => String(value || '').trim());
+
+      $('drawerContent').innerHTML = `
+        <div class="drawer-profile">
+          ${avatarMarkup(user, true)}
+          <h2>${esc(user.fullName || 'Unnamed staff')}</h2>
+          <p>${esc(user.jobTitle || user.department || 'MRANTI Staff')}</p>
+          <div class="drawer-chips">${divisionChip(user)}${statusChip(user)}</div>
+        </div>
+
+        <div class="details">
+          ${rows.map(([label,value,type]) => `
+            <div class="detail">
+              <span>${esc(label)}</span>
+              <strong>
+                ${type === 'email'
+                  ? `<a href="mailto:${esc(value)}">${esc(value)}</a>`
+                  : esc(value)}
+              </strong>
+            </div>
+          `).join('')}
+        </div>
+
+        <div class="drawer-actions">
+          <a class="primary" href="mailto:${esc(user.primaryEmail)}">Email ${esc((user.givenName || user.fullName || 'staff').split(' ')[0])}</a>
+          <button class="secondary" type="button" id="drawerCopy">Copy email</button>
+        </div>`;
+
+      $('drawerCopy')?.addEventListener('click', () => copyEmail(user.primaryEmail));
+      $('drawerBackdrop').hidden = false;
+      $('staffDrawer').classList.add('open');
+      $('staffDrawer').setAttribute('aria-hidden', 'false');
+    }
+
+    async function copyEmail(email) {
+      if (!email) return;
+      try {
+        await navigator.clipboard.writeText(email);
+        toast('Email copied');
+      } catch {
+        toast(email);
+      }
+    }
+
+    function clearFilters() {
+      $('searchInput').value = '';
+      $('departmentFilter').value = '';
+      $('statusFilter').value = '';
+      $('sortSelect').value = 'name';
+      render();
+    }
+
+    function setView(mode) {
+      currentView = mode === 'list' ? 'list' : 'grid';
+      $('gridViewButton').classList.toggle('active', currentView === 'grid');
+      $('listViewButton').classList.toggle('active', currentView === 'list');
+      render();
+    }
+
+    function showLogin(error = '') {
+      $('loginScreen').hidden = false;
+      $('appScreen').hidden = true;
+      $('loginError').textContent = error;
+      $('loginError').classList.toggle('show', Boolean(error));
+    }
+
+    function showApp(user) {
+      $('loginScreen').hidden = true;
+      $('appScreen').hidden = false;
+      $('userName').textContent = user.displayName || user.email || 'MRANTI Staff';
+      $('userEmail').textContent = user.email || '';
+      $('menuName').textContent = user.displayName || 'MRANTI Staff';
+      $('menuEmail').textContent = user.email || '';
+      $('userInitial').textContent = initials(user.displayName || user.email);
+    }
+
+    function validDomain(user) {
+      return String(user?.email || '').toLowerCase().endsWith(`@${ALLOWED_DOMAIN}`);
+    }
+
+    firebase.initializeApp(FIREBASE_CONFIG);
+    firebase.auth().setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({ hd: ALLOWED_DOMAIN, prompt: 'select_account' });
+
+    $('signInButton').addEventListener('click', async () => {
+      $('signInButton').disabled = true;
+      $('loginError').classList.remove('show');
+
+      try {
+        const result = await firebase.auth().signInWithPopup(provider);
+        if (!validDomain(result.user)) {
+          await firebase.auth().signOut();
+          throw new Error('Please sign in using your @mranti.my account.');
+        }
+      } catch (error) {
+        showLogin(error.message || 'Unable to sign in.');
+      } finally {
+        $('signInButton').disabled = false;
+      }
+    });
+
+    $('signOutButton').addEventListener('click', async () => {
+      sessionStorage.removeItem(CACHE_KEY);
+      await firebase.auth().signOut();
+    });
+
+    $('refreshButton').addEventListener('click', () => loadDirectory({ force: true }));
+
+    $('userButton').addEventListener('click', event => {
+      event.stopPropagation();
+      $('userMenu').hidden = !$('userMenu').hidden;
+    });
+
+    document.addEventListener('click', event => {
+      if (!event.target.closest('.user-area')) $('userMenu').hidden = true;
+    });
+
+    $('searchInput').addEventListener('input', render);
+    $('departmentFilter').addEventListener('change', render);
+    $('statusFilter').addEventListener('change', render);
+    $('sortSelect').addEventListener('change', render);
+    $('clearFiltersButton').addEventListener('click', clearFilters);
+    $('gridViewButton').addEventListener('click', () => setView('grid'));
+    $('listViewButton').addEventListener('click', () => setView('list'));
+
+    $('staffGrid').addEventListener('click', event => {
+      const action = event.target.closest('[data-action]');
+
+      if (action) {
+        event.stopPropagation();
+        const email = action.dataset.email || '';
+
+        if (action.dataset.action === 'copy') copyEmail(email);
+        if (action.dataset.action === 'email') window.location.href = `mailto:${email}`;
+        return;
+      }
+
+      const cardEl = event.target.closest('[data-id]');
+      if (!cardEl) return;
+
+      const id = cardEl.dataset.id;
+      const user = allUsers.find(u => String(u.id || u.primaryEmail) === String(id));
+      openDrawer(user);
+    });
+
+    $('closeDrawerButton').addEventListener('click', closeDrawer);
+    $('drawerBackdrop').addEventListener('click', closeDrawer);
+
+    document.addEventListener('keydown', event => {
+      if (event.key === 'Escape') closeDrawer();
+      if (
+        event.key === '/' &&
+        !/input|textarea|select/i.test(document.activeElement?.tagName || '')
+      ) {
+        event.preventDefault();
+        $('searchInput').focus();
+      }
+    });
+
+    populateDivisions();
+
+    firebase.auth().onAuthStateChanged(async user => {
+      if (!user) {
+        showLogin();
+        return;
+      }
+
+      if (!validDomain(user)) {
+        await firebase.auth().signOut();
+        showLogin('Please sign in using your @mranti.my account.');
+        return;
+      }
+
+      showApp(user);
+      loadDirectory();
+    });
   </script>
 </body>
 </html>
