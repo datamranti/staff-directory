@@ -6,11 +6,11 @@
   <meta name="theme-color" content="#f5f9ff" />
   <title>MRANTI Staff Directory</title>
 
-  <link rel="icon" type="image/png" sizes="512x512" href="./public/favicon-512.png?v=7" />
-  <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32.png?v=7" />
-  <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16.png?v=7" />
-  <link rel="shortcut icon" href="./public/favicon.ico?v=7" />
-  <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png?v=7" />
+  <link rel="icon" type="image/png" sizes="512x512" href="./public/favicon-512.png?v=8" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32.png?v=8" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16.png?v=8" />
+  <link rel="shortcut icon" href="./public/favicon.ico?v=8" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png?v=8" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -113,19 +113,6 @@
       object-position:left center;
     }
     .login-brand-divider{width:1px;height:29px;background:#cbd5e1}
-    .login-brand-symbol{
-      width:46px;
-      height:46px;
-      flex:0 0 46px;
-      display:grid;
-      place-items:center;
-      border-radius:13px;
-      color:var(--crm-blue);
-      background:#fff;
-      border:1px solid #dbeafe;
-      box-shadow:0 5px 16px rgba(37,99,235,.07);
-    }
-    .login-brand-symbol svg{width:24px;height:24px}
     .login-brand-copy{min-width:0}
     .login-brand-name{font-size:23px;line-height:1.05;font-weight:800;letter-spacing:-.6px;color:#0f172a;white-space:nowrap}
     .login-brand-product{margin-top:5px;color:#334155;font-size:11px;line-height:1;font-weight:600;letter-spacing:4.2px;text-transform:uppercase;white-space:nowrap}
@@ -321,6 +308,7 @@
       min-height:68px;
       display:flex;
       align-items:center;
+      justify-content:space-between;
       gap:16px;
       padding:9px 12px 9px 16px;
     }
@@ -342,44 +330,12 @@
       object-position:left center;
     }
     .divider{width:1px;height:28px;background:#d8e1ef}
-    .brand-app-icon{
-      width:40px;
-      height:40px;
-      flex:0 0 40px;
-      display:grid;
-      place-items:center;
-      border:1px solid #dbeafe;
-      border-radius:12px;
-      color:#2563eb;
-      background:#f8fbff;
-    }
-    .brand-app-icon svg{width:22px;height:22px}
-    .nav-center{
-      flex:1;
-      display:flex;
-      align-items:center;
-      justify-content:center;
-      gap:4px;
-    }
-    .nav-link{
-      position:relative;
-      min-height:42px;
-      display:flex;
-      align-items:center;
-      padding:9px 12px;
-      border-radius:10px;
+    .brand-page-name{
       color:#334155;
       font-size:12px;
+      line-height:1;
       font-weight:750;
       white-space:nowrap;
-    }
-    .nav-link::after{
-      content:"";
-      position:absolute;
-      left:8px;right:8px;bottom:-5px;
-      height:2px;
-      border-radius:999px;
-      background:#2563eb;
     }
     .user-area{position:relative;display:flex;align-items:center;gap:10px;flex-shrink:0}
     .refresh-btn{
@@ -723,8 +679,7 @@
       .topbar{width:calc(100% - 20px);margin-top:8px}
       .topbar-inner{min-height:62px;padding:8px 10px}
       .brand img{width:112px;height:36px;flex-basis:112px}
-      .brand-app-icon{width:34px;height:34px;flex-basis:34px}
-      .nav-center{display:none}
+      .brand-page-name{font-size:11px}
       .toolbar{grid-template-columns:1fr 1fr 1fr}
       .search{grid-column:1/-1}
       .view-toggle{justify-self:stretch}
@@ -749,7 +704,7 @@
     @media(max-width:760px){
       .topbar-inner{gap:8px;padding:8px}
       .brand img{width:92px;height:32px;flex-basis:92px}
-      .brand-app-icon{width:30px;height:30px;flex-basis:30px}
+      .brand-page-name{font-size:10.5px}
       .divider{height:23px}
       .user-btn{min-width:40px;width:40px;padding:3px}
       .user-copy,.user-btn .chev{display:none}
@@ -769,7 +724,6 @@
       .login-shell{border-radius:20px}
       .login-story-panel{padding:24px 20px 22px}
       .login-mranti-logo{width:122px;height:40px}
-      .login-brand-symbol{width:40px;height:40px;flex-basis:40px}
       .login-brand-name{font-size:19px}
       .login-brand-product{font-size:9px;letter-spacing:3px}
       .login-hero-copy{margin-top:26px}
@@ -807,14 +761,6 @@
               src="https://cdn.prod.website-files.com/6719e3902a71ea8154ba371d/6996a2c470a01e3f32ffa080_M30.png"
               alt="MRANTI 30 Years" />
             <span class="login-brand-divider" aria-hidden="true"></span>
-            <span class="login-brand-symbol" aria-hidden="true">
-              <svg viewBox="0 0 24 24">
-                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-                <circle cx="9" cy="7" r="4"></circle>
-                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-              </svg>
-            </span>
             <div class="login-brand-copy">
               <div class="login-brand-name">Staff Directory</div>
               <div class="login-brand-product">Workspace</div>
@@ -898,19 +844,9 @@
             src="https://cdn.prod.website-files.com/6719e3902a71ea8154ba371d/6996a2c470a01e3f32ffa080_M30.png"
             alt="MRANTI 30 Years" />
           <span class="divider" aria-hidden="true"></span>
-          <span class="brand-app-icon" aria-label="Staff Directory application">
-            <svg viewBox="0 0 24 24">
-              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-              <circle cx="9" cy="7" r="4"></circle>
-              <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-            </svg>
-          </span>
+          <span class="brand-page-name">Staff Directory</span>
         </div>
 
-        <nav class="nav-center" aria-label="Staff Directory navigation">
-          <span class="nav-link">Staff Directory</span>
-        </nav>
 
         <div class="user-area">
           <button id="refreshButton" class="refresh-btn" type="button" title="Refresh directory" aria-label="Refresh directory">
@@ -1029,7 +965,7 @@
   <script>
     const API_URL = 'https://mrantidata.app.n8n.cloud/webhook/staff-directory-data';
     const ALLOWED_DOMAIN = 'mranti.my';
-    const CACHE_KEY = 'mranti_staff_directory_cache_v7';
+    const CACHE_KEY = 'mranti_staff_directory_cache_v8';
 
     const FIREBASE_CONFIG = {
       apiKey: 'AIzaSyDXz0gL67r9BafTg8nL6VdHYdw1tfcxhto',
