@@ -6,379 +6,632 @@
   <meta name="theme-color" content="#f5f9ff" />
   <title>MRANTI Staff Directory</title>
 
-  <link rel="icon" type="image/png" sizes="512x512" href="./public/favicon-512.png?v=6" />
-  <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32.png?v=6" />
-  <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16.png?v=6" />
-  <link rel="shortcut icon" href="./public/favicon.ico?v=6" />
-  <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png?v=6" />
+  <link rel="icon" type="image/png" sizes="512x512" href="./public/favicon-512.png?v=7" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32.png?v=7" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16.png?v=7" />
+  <link rel="shortcut icon" href="./public/favicon.ico?v=7" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png?v=7" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
 
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
   <style>
     :root{
-      --canvas:#f5f9ff;
-      --surface:#ffffff;
-      --surface-soft:#f9fbff;
-      --ink:#101828;
-      --muted:#667085;
-      --muted2:#98a2b3;
-      --blue:#2463eb;
-      --blue-dark:#1e55cf;
-      --blue-soft:#edf4ff;
-      --line:#d5e5fb;
-      --line-soft:#e8eef7;
-      --success:#087a55;
-      --success-bg:#ecfdf3;
-      --success-line:#a6f4c5;
-      --resigned:#5d6b82;
-      --resigned-bg:#f2f4f7;
-      --resigned-line:#d0d5dd;
-      --danger:#b42318;
-      --shadow:0 18px 48px rgba(37,99,235,.08),0 2px 8px rgba(15,23,42,.03);
-      --radius:18px;
+      --crm-blue:#2563eb;
+      --crm-blue-dark:#1d4ed8;
+      --crm-blue-soft:#eff6ff;
+      --crm-ink:#0f172a;
+      --crm-text:#334155;
+      --crm-muted:#64748b;
+      --crm-muted-2:#94a3b8;
+      --crm-line:#dbeafe;
+      --crm-line-strong:#bfdbfe;
+      --crm-surface:#ffffff;
+      --crm-canvas:#f8fbff;
+      --crm-success:#059669;
+      --crm-success-bg:#ecfdf5;
+      --crm-success-line:#a7f3d0;
+      --crm-resigned:#64748b;
+      --crm-resigned-bg:#f8fafc;
+      --crm-resigned-line:#cbd5e1;
+      --crm-shadow:0 12px 34px rgba(37,99,235,.08);
     }
 
-    *{box-sizing:border-box}
-    html{min-height:100%;background:var(--canvas)}
+    *,*::before,*::after{box-sizing:border-box}
+    html,body{min-height:100%;margin:0}
     body{
-      margin:0;
-      min-height:100vh;
-      font-family:Poppins,Arial,sans-serif;
-      color:var(--ink);
-      background:
-        radial-gradient(circle at 12% 2%,rgba(102,171,255,.13),transparent 26%),
-        linear-gradient(180deg,#f8fbff 0%,#f2f7ff 48%,#f7fbff 100%);
+      font-family:'Inter','Segoe UI',sans-serif;
+      color:var(--crm-ink);
+      background:linear-gradient(180deg,#f8fbff 0%,#eff6ff 100%);
     }
     [hidden]{display:none!important}
     button,input,select{font:inherit}
     button{cursor:pointer}
     svg{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
 
-    /* LOGIN — MATCHES CORE / CRM SIGN-IN SCREEN */
-    .login-screen{
+    /* =========================================================
+       SIGNED-OUT SCREEN — COPIES THE CURRENT CRM VISUAL SYSTEM
+       ========================================================= */
+    #loginScreen{
+      width:100%;
       min-height:100vh;
-      display:block;
-      padding:0;
-      background:
-        radial-gradient(circle at 92% 11%,rgba(37,99,235,.045),transparent 26%),
-        linear-gradient(180deg,#ffffff 0%,#fbfdff 100%);
+      min-height:100dvh;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      padding:12px;
+      overflow:auto;
+      background:linear-gradient(135deg,#f8fafc 0%,#edf4ff 48%,#eaf2fb 100%);
     }
-    .login-card{
-      width:min(420px,calc(100vw - 56px));
-      margin-left:clamp(28px,8.5vw,140px);
-      padding-top:clamp(96px,16vh,155px);
+
+    .login-shell{
+      position:relative;
+      width:min(1540px,100%);
+      min-height:min(820px,calc(100dvh - 24px));
+      display:grid;
+      grid-template-columns:minmax(0,1.45fr) minmax(440px,.92fr);
+      grid-template-rows:minmax(0,1fr) auto;
+      grid-template-areas:
+        "story access"
+        "benefits access";
+      overflow:hidden;
+      border:1px solid rgba(191,219,254,.65);
+      border-radius:28px;
+      background:
+        radial-gradient(circle at 18% 15%,rgba(59,130,246,.10),transparent 31%),
+        radial-gradient(circle at 67% 55%,rgba(59,130,246,.09),transparent 34%),
+        linear-gradient(135deg,rgba(255,255,255,.96),rgba(239,246,255,.88));
+      box-shadow:0 20px 58px rgba(15,23,42,.10),inset 0 1px 0 rgba(255,255,255,.95);
+    }
+    .login-shell::before{
+      content:"";
+      position:absolute;
+      inset:0;
+      pointer-events:none;
+      opacity:.7;
+      background:linear-gradient(39deg,transparent 47.7%,rgba(255,255,255,.7) 48%,rgba(255,255,255,.7) 48.35%,transparent 48.65%);
+    }
+
+    .login-story-panel{
+      grid-area:story;
+      position:relative;
+      z-index:1;
+      min-width:0;
+      padding:48px 56px 18px;
+    }
+    .login-brand-row{display:flex;align-items:center;justify-content:flex-start}
+    .login-brand-lockup{display:flex;align-items:center;gap:14px;min-width:0}
+    .login-mranti-logo{
+      display:block;
+      width:154px;
+      height:48px;
+      object-fit:contain;
+      object-position:left center;
+    }
+    .login-brand-divider{width:1px;height:29px;background:#cbd5e1}
+    .login-brand-symbol{
+      width:46px;
+      height:46px;
+      flex:0 0 46px;
+      display:grid;
+      place-items:center;
+      border-radius:13px;
+      color:var(--crm-blue);
+      background:#fff;
+      border:1px solid #dbeafe;
+      box-shadow:0 5px 16px rgba(37,99,235,.07);
+    }
+    .login-brand-symbol svg{width:24px;height:24px}
+    .login-brand-copy{min-width:0}
+    .login-brand-name{font-size:23px;line-height:1.05;font-weight:800;letter-spacing:-.6px;color:#0f172a;white-space:nowrap}
+    .login-brand-product{margin-top:5px;color:#334155;font-size:11px;line-height:1;font-weight:600;letter-spacing:4.2px;text-transform:uppercase;white-space:nowrap}
+
+    .login-hero-copy{max-width:590px;margin-top:50px}
+    .login-eyebrow{
+      display:flex;
+      align-items:center;
+      gap:10px;
+      margin-bottom:18px;
+      color:#2563eb;
+      font-size:10.5px;
+      line-height:1;
+      font-weight:800;
+      letter-spacing:1.8px;
+      text-transform:uppercase;
+    }
+    .login-eyebrow::before{content:"";width:28px;height:2px;background:#2563eb;border-radius:999px}
+    .login-hero-title{
+      margin:0;
+      color:#0f172a;
+      font-size:clamp(50px,4.8vw,68px);
+      line-height:.96;
+      font-weight:800;
+      letter-spacing:-3.2px;
+    }
+    .login-hero-title span{display:block}
+    .login-hero-title .accent{
+      margin-top:7px;
+      color:#2563eb;
+      background:linear-gradient(90deg,#4f46e5 0%,#3b82f6 58%,#0891b2 100%);
+      -webkit-background-clip:text;
+      background-clip:text;
+      -webkit-text-fill-color:transparent;
+    }
+    .login-hero-subtitle{
+      max-width:590px;
+      margin:25px 0 0;
+      color:#334155;
+      font-size:15px;
+      line-height:1.62;
+      font-weight:450;
+    }
+
+    .login-access-panel{
+      grid-area:access;
+      position:relative;
+      z-index:2;
+      min-width:0;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin:44px 42px 44px 0;
+      padding:52px 52px 52px 70px;
+      border:1px solid rgba(226,232,240,.92);
+      border-radius:142px 18px 18px 142px;
+      background:rgba(255,255,255,.94);
+      box-shadow:0 26px 70px rgba(37,99,235,.12),inset 0 1px 0 rgba(255,255,255,1);
+    }
+    #loginScreen .login-card{
+      width:100%;
+      max-width:450px;
+      margin:0;
+      padding:0;
       border:0;
       border-radius:0;
       background:transparent;
       box-shadow:none;
+      text-align:left;
     }
-    .login-brand,
-    .login-icon,
-    .login-card .eyebrow,
-    .login-card > .divider,
-    .trust{
-      display:none;
-    }
-    .login-card h1{
+    #loginScreen .login-title{
       margin:0;
-      color:#101828;
+      color:#0f172a;
       font-size:36px;
-      line-height:1.15;
+      line-height:1.12;
       font-weight:800;
-      letter-spacing:-1.35px;
+      letter-spacing:-1.2px;
     }
-    .login-card p{
-      max-width:405px;
-      margin:20px 0 0;
-      color:#667085;
+    #loginScreen .login-sub{
+      margin:21px 0 26px;
+      color:#475569;
       font-size:15px;
-      line-height:1.55;
-      font-weight:400;
+      line-height:1.6;
     }
-    .signin{
+    #loginScreen .signin{
       width:100%;
-      min-height:57px;
-      margin-top:27px;
-      padding:0 18px;
+      min-height:64px;
       display:flex;
       align-items:center;
       justify-content:center;
-      gap:13px;
-      border:1px solid #cbd9eb;
-      border-radius:12px;
-      color:#101828;
+      gap:14px;
+      padding:15px 20px;
+      border:1.5px solid #cbd5e1;
+      border-radius:13px;
       background:#fff;
-      box-shadow:none;
-      font-size:14px;
+      color:#0f172a;
+      font-size:16px;
       font-weight:700;
-      transition:border-color .15s ease,background .15s ease,box-shadow .15s ease;
+      box-shadow:none;
+      transition:.18s ease;
     }
-    .signin:hover{
-      color:#101828;
-      background:#fbfdff;
-      border-color:#9fbae0;
-      box-shadow:0 5px 16px rgba(37,99,235,.06);
+    #loginScreen .signin:hover{
+      border-color:#3b82f6;
+      background:#f8fafc;
+      box-shadow:0 10px 24px rgba(37,99,235,.10);
+      transform:translateY(-1px);
     }
-    .signin:disabled{opacity:.55;cursor:wait}
-    .google-g{
-      width:20px;
-      height:20px;
-      flex:0 0 20px;
-      display:block;
-    }
-    .login-divider{
-      width:100%;
-      height:1px;
-      margin:22px 0 20px;
-      background:#d5deea;
-    }
-    .login-permissions{
-      display:flex;
-      flex-direction:column;
-      gap:13px;
-    }
-    .permission-row{
+    .google-g{width:26px;height:26px;flex:0 0 26px;display:block}
+    .login-card-divider{height:1px;margin:22px 0 19px;background:#cbd5e1}
+    .login-trust-list{display:flex;flex-direction:column;gap:13px}
+    .login-trust-item{
       display:grid;
-      grid-template-columns:40px 1fr;
+      grid-template-columns:40px minmax(0,1fr);
       align-items:center;
       gap:13px;
-      color:#596a83;
+      color:#475569;
       font-size:13px;
       line-height:1.45;
+      font-weight:500;
     }
-    .permission-icon{
+    .login-trust-item strong{color:#334155;font-weight:650}
+    .login-trust-icon{
       width:40px;
       height:40px;
       display:grid;
       place-items:center;
+      padding:9px;
       border-radius:11px;
     }
-    .permission-icon.shield{
-      color:#2647ff;
-      background:#eef2ff;
-    }
-    .permission-icon.lock{
-      color:#00a5c8;
-      background:#eafcff;
-    }
-    .permission-icon svg{
-      width:18px;
-      height:18px;
-    }
-    .permission-row strong{
-      color:#344054;
-      font-weight:700;
-    }
+    .login-trust-icon.shield{color:#4f46e5;background:#eef2ff}
+    .login-trust-icon.lock{color:#0891b2;background:#ecfeff}
+    .login-trust-icon svg{width:20px;height:20px}
     .login-error{
       display:none;
-      margin-top:13px;
-      padding:10px 12px;
-      border:1px solid #fecdd3;
-      border-radius:10px;
-      color:#b42318;
-      background:#fff1f2;
-      font-size:10px;
+      width:100%;
+      margin:0 0 15px;
+      padding:11px 13px;
+      border:1px solid #fecaca;
+      border-radius:11px;
+      background:#fef2f2;
+      color:#b91c1c;
+      font-size:12px;
       line-height:1.45;
     }
     .login-error.show{display:block}
-    /* CRM-MATCHED HEADER — NOT STICKY */
+
+    .login-benefit-band{
+      grid-area:benefits;
+      position:relative;
+      z-index:1;
+      display:grid;
+      grid-template-columns:repeat(3,minmax(0,1fr));
+      gap:14px;
+      padding:4px 56px 32px;
+    }
+    .login-benefit-card{
+      min-height:112px;
+      padding:14px;
+      border:1px solid rgba(191,219,254,.6);
+      border-radius:16px;
+      background:rgba(255,255,255,.58);
+    }
+    .login-benefit-icon{
+      width:34px;height:34px;margin-bottom:9px;padding:7px;
+      display:grid;place-items:center;border-radius:10px;
+      color:#2563eb;background:#eff6ff
+    }
+    .login-benefit-icon svg{width:18px;height:18px}
+    .login-benefit-card strong{display:block;color:#0f172a;font-size:11px;font-weight:800}
+    .login-benefit-card span{display:block;margin-top:4px;color:#64748b;font-size:9px;line-height:1.45}
+
+    /* =========================================================
+       SIGNED-IN SHELL — SAME NAV / SPACING TOKENS AS CRM
+       Navbar LOOK is copied; sticky behaviour is intentionally removed
+       because you explicitly asked it not to follow scrolling.
+       ========================================================= */
+    #appScreen{min-height:100vh}
     .topbar{
       position:relative;
-      z-index:20;
-      padding:14px 28px 0;
-      background:transparent
+      z-index:120;
+      width:min(1600px,calc(100% - 32px));
+      min-height:68px;
+      margin:12px auto 0;
+      padding:0;
+      border:1px solid rgba(196,214,239,.9);
+      border-radius:20px;
+      background:rgba(255,255,255,.91);
+      box-shadow:0 12px 34px rgba(37,99,235,.08);
+      backdrop-filter:blur(18px);
+      overflow:visible;
     }
     .topbar-inner{
-      width:100%;
-      min-height:64px;
-      margin:0 auto;
-      padding:7px 12px 7px 14px;
-      display:grid;
-      grid-template-columns:minmax(260px,1fr) auto minmax(260px,1fr);
+      min-height:68px;
+      display:flex;
       align-items:center;
-      gap:18px;
-      border:1px solid #cfe0f6;
-      border-radius:20px;
-      background:rgba(255,255,255,.97);
-      box-shadow:0 12px 34px rgba(37,99,235,.07)
+      gap:16px;
+      padding:9px 12px 9px 16px;
     }
-    .brand{display:flex;align-items:center;gap:13px;justify-self:start}
-    .brand img{width:155px;height:44px;object-fit:contain;object-position:left center}
-    .brand-label{color:var(--blue);font-size:11px;font-weight:800;letter-spacing:1.7px;text-transform:uppercase}
-    .nav-center{display:flex;justify-content:center}
+    .brand{
+      appearance:none;
+      border:0;
+      background:transparent;
+      padding:0;
+      display:flex;
+      align-items:center;
+      gap:12px;
+      flex-shrink:0;
+    }
+    .brand img{
+      width:124px;
+      height:40px;
+      flex:0 0 124px;
+      object-fit:contain;
+      object-position:left center;
+    }
+    .divider{width:1px;height:28px;background:#d8e1ef}
+    .brand-app-icon{
+      width:40px;
+      height:40px;
+      flex:0 0 40px;
+      display:grid;
+      place-items:center;
+      border:1px solid #dbeafe;
+      border-radius:12px;
+      color:#2563eb;
+      background:#f8fbff;
+    }
+    .brand-app-icon svg{width:22px;height:22px}
+    .nav-center{
+      flex:1;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      gap:4px;
+    }
     .nav-link{
       position:relative;
-      min-height:45px;
-      padding:0 12px;
-      display:flex;align-items:center;
-      color:#344054;
-      font-size:11px;font-weight:700
+      min-height:42px;
+      display:flex;
+      align-items:center;
+      padding:9px 12px;
+      border-radius:10px;
+      color:#334155;
+      font-size:12px;
+      font-weight:750;
+      white-space:nowrap;
     }
     .nav-link::after{
       content:"";
-      position:absolute;left:7px;right:7px;bottom:-7px;height:2px;
-      border-radius:999px;background:var(--blue)
+      position:absolute;
+      left:8px;right:8px;bottom:-5px;
+      height:2px;
+      border-radius:999px;
+      background:#2563eb;
     }
-    .user-area{position:relative;display:flex;align-items:center;justify-self:end;gap:8px}
+    .user-area{position:relative;display:flex;align-items:center;gap:10px;flex-shrink:0}
     .refresh-btn{
-      width:40px;height:40px;display:grid;place-items:center;
-      border:1px solid var(--line);border-radius:12px;
-      background:#fff;color:#53627a
+      width:42px;
+      height:42px;
+      display:grid;
+      place-items:center;
+      border:1px solid #dce6f4;
+      border-radius:12px;
+      background:#fff;
+      color:#53627a;
     }
-    .refresh-btn:hover{color:var(--blue);background:#f8fbff}
-    .refresh-btn svg{width:17px;height:17px}
-    .refresh-btn.spinning svg{animation:spin .8s linear infinite}
+    .refresh-btn:hover{color:#2563eb;background:#f8faff}
+    .refresh-btn svg{width:18px;height:18px}
+    .refresh-btn.spinning svg{animation:spin .85s linear infinite}
     @keyframes spin{to{transform:rotate(360deg)}}
     .user-btn{
-      min-width:205px;height:40px;padding:3px 8px 3px 4px;
-      display:flex;align-items:center;gap:8px;
-      border:1px solid var(--line);border-radius:12px;
-      background:#fff;color:var(--ink);text-align:left
+      min-width:205px;
+      height:42px;
+      padding:4px 9px 4px 5px;
+      display:flex;
+      align-items:center;
+      gap:9px;
+      border:1px solid #dbeafe;
+      border-radius:12px;
+      background:#fff;
+      color:#0f172a;
+      text-align:left;
     }
     .user-avatar{
       width:32px;height:32px;flex:0 0 32px;
-      display:grid;place-items:center;border-radius:9px;
-      color:#fff;background:#6aa634;font-size:12px
+      display:grid;place-items:center;
+      border-radius:9px;
+      color:#fff;background:#6ea83a;
+      font-size:12px;font-weight:700;
     }
     .user-copy{min-width:0;flex:1;display:flex;flex-direction:column}
-    .user-copy strong,.user-copy span{max-width:145px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-    .user-copy strong{font-size:9.5px}
-    .user-copy span{color:var(--muted);font-size:7.5px}
-    .user-btn .chev{width:12px;height:12px;color:#8491a5}
+    .user-copy strong,.user-copy span{
+      max-width:145px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap
+    }
+    .user-copy strong{font-size:10px;font-weight:700}
+    .user-copy span{margin-top:1px;color:#64748b;font-size:8px}
+    .user-btn .chev{width:13px;height:13px;color:#8794a8}
     .user-menu{
-      position:absolute;top:calc(100% + 8px);right:0;width:230px;
-      overflow:hidden;border:1px solid var(--line);border-radius:12px;
-      background:#fff;box-shadow:var(--shadow)
+      position:absolute;top:calc(100% + 8px);right:0;width:235px;
+      overflow:hidden;border:1px solid #dbeafe;border-radius:13px;
+      background:#fff;box-shadow:0 18px 44px rgba(15,23,42,.14)
     }
-    .user-menu-head{padding:13px 14px;border-bottom:1px solid var(--line-soft)}
+    .user-menu-head{padding:13px 14px;border-bottom:1px solid #e8eef7}
     .user-menu-head strong{display:block;font-size:10px}
-    .user-menu-head span{display:block;margin-top:2px;color:var(--muted);font-size:8px}
-    .user-menu button{width:100%;padding:10px 14px;border:0;background:#fff;color:#475467;text-align:left;font-size:9px;font-weight:700}
-    .user-menu button:hover{background:#f8fbff;color:var(--blue)}
+    .user-menu-head span{display:block;margin-top:2px;color:#64748b;font-size:8px}
+    .user-menu button{
+      width:100%;padding:10px 14px;border:0;background:#fff;
+      color:#475569;text-align:left;font-size:9px;font-weight:700
+    }
+    .user-menu button:hover{background:#f8fbff;color:#2563eb}
 
-    /* PAGE / CRM SPACING */
-    .page-shell{width:100%;padding:30px 36px 52px}
+    .page-shell{
+      width:min(1600px,100%);
+      max-width:1600px;
+      margin:0 auto;
+      padding:24px 24px 46px;
+    }
     .hero{
-      min-height:130px;
-      padding:7px 2px 24px;
-      display:flex;align-items:flex-end;justify-content:space-between;gap:24px;
-      border-bottom:1px solid #cfe0f5
+      min-height:146px;
+      padding:20px 2px 28px;
+      display:flex;
+      align-items:flex-end;
+      justify-content:space-between;
+      gap:24px;
+      border-bottom:1px solid #cfe0f5;
     }
-    .hero h1{margin:6px 0 6px;font-size:34px;line-height:1.12;letter-spacing:-1.2px}
-    .hero p{margin:0;color:var(--muted);font-size:12px}
-    .stats{display:flex;gap:9px}
+    .hero .eyebrow{
+      margin:0;
+      color:#2563eb;
+      font-size:10px;
+      font-weight:800;
+      letter-spacing:1.6px;
+      text-transform:uppercase;
+    }
+    .hero h1{
+      margin:6px 0 8px;
+      color:#0f172a;
+      font-size:36px;
+      line-height:1.08;
+      font-weight:800;
+      letter-spacing:-1.35px;
+    }
+    .hero p{
+      margin:0;
+      color:#64748b;
+      font-size:13px;
+      line-height:1.55;
+    }
+    .stats{display:flex;gap:10px}
     .stat{
-      min-width:115px;padding:11px 13px;
-      display:flex;align-items:baseline;gap:6px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      background:rgba(255,255,255,.88)
+      min-width:126px;
+      padding:12px 14px;
+      display:flex;
+      align-items:baseline;
+      gap:7px;
+      border:1px solid rgba(191,219,254,.78);
+      border-radius:14px;
+      background:#fff;
+      box-shadow:0 8px 24px rgba(37,99,235,.05);
     }
-    .stat strong{color:var(--blue);font-size:18px;font-weight:800}
-    .stat span{color:var(--muted);font-size:8px;font-weight:600}
+    .stat strong{color:#2563eb;font-size:20px;font-weight:800}
+    .stat span{color:#64748b;font-size:9px;font-weight:650}
 
     .toolbar{
-      margin-top:16px;
+      margin-top:18px;
       display:grid;
-      grid-template-columns:minmax(360px,1.6fr) minmax(180px,.62fr) minmax(145px,.48fr) minmax(155px,.5fr) auto;
-      gap:9px
+      grid-template-columns:minmax(360px,1.45fr) minmax(180px,.55fr) minmax(150px,.45fr) minmax(150px,.45fr) auto;
+      gap:10px;
     }
     .search,.select,.view-toggle{
-      min-height:44px;
-      border:1px solid var(--line);
-      border-radius:12px;
-      background:#fff
+      min-height:48px;
+      border:1px solid rgba(191,219,254,.78);
+      border-radius:13px;
+      background:#fff;
+      box-shadow:0 3px 10px rgba(37,99,235,.025);
     }
-    .search{padding:0 12px;display:flex;align-items:center;gap:9px}
-    .search svg{width:16px;height:16px;color:#7a90b0}
-    .search input{min-width:0;flex:1;border:0;outline:0;background:transparent;color:var(--ink);font-size:10.5px}
-    .select{padding:6px 10px 5px;display:flex;flex-direction:column;justify-content:center}
-    .select span{color:var(--muted2);font-size:7px;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
-    .select select{width:100%;border:0;outline:0;background:transparent;color:#344054;font-size:9.5px;font-weight:650}
-    .view-toggle{display:flex;align-items:center;padding:3px}
-    .view-btn{width:38px;height:36px;border:0;border-radius:9px;color:#7c8ca5;background:transparent}
-    .view-btn svg{width:16px;height:16px}
-    .view-btn.active{color:var(--blue);background:var(--blue-soft)}
+    .search{padding:0 14px;display:flex;align-items:center;gap:10px}
+    .search svg{width:17px;height:17px;color:#7890b3}
+    .search input{
+      min-width:0;flex:1;border:0;outline:0;background:transparent;
+      color:#0f172a;font-size:11.5px
+    }
+    .select{padding:7px 11px 6px;display:flex;flex-direction:column;justify-content:center}
+    .select span{
+      color:#94a3b8;font-size:7.5px;font-weight:700;
+      letter-spacing:.08em;text-transform:uppercase
+    }
+    .select select{
+      width:100%;border:0;outline:0;background:transparent;
+      color:#334155;font-size:10px;font-weight:650
+    }
+    .view-toggle{display:flex;align-items:center;padding:4px}
+    .view-btn{
+      width:39px;height:38px;border:0;border-radius:10px;
+      color:#7d8ea7;background:transparent
+    }
+    .view-btn svg{width:17px;height:17px}
+    .view-btn.active{color:#2563eb;background:#eff6ff}
 
     .panel{
       margin-top:14px;
-      padding:14px;
-      border:1px solid #d8e5f7;
+      padding:15px;
+      border:1px solid rgba(191,219,254,.78);
       border-radius:18px;
-      background:rgba(255,255,255,.9);
-      box-shadow:0 10px 28px rgba(37,99,235,.055)
+      background:rgba(255,255,255,.94);
+      box-shadow:var(--crm-shadow);
     }
-    .panel-head{min-height:34px;padding:0 2px 10px;display:flex;align-items:center;justify-content:space-between}
-    .panel-label{color:var(--blue);font-size:9px;font-weight:800;letter-spacing:1.4px}
-    .result-count{margin-left:9px;color:var(--blue);font-size:9px;font-weight:700}
-    .clear-btn{border:0;background:transparent;color:var(--blue);font-size:9px;font-weight:700}
-    .banner{margin-bottom:11px;padding:9px 11px;border-radius:9px;font-size:9px}
+    .panel-head{
+      min-height:38px;
+      padding:0 3px 11px;
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap:15px;
+    }
+    .panel-label{
+      color:#2563eb;
+      font-size:9.5px;
+      font-weight:800;
+      letter-spacing:1.5px;
+    }
+    .result-count{margin-left:10px;color:#2563eb;font-size:9.5px;font-weight:700}
+    .clear-btn{
+      border:0;background:transparent;color:#2563eb;
+      font-size:9.5px;font-weight:700
+    }
+    .banner{margin-bottom:12px;padding:10px 12px;border-radius:11px;font-size:10px;line-height:1.5}
     .banner.error{color:#9e2f38;background:#fff0f1;border:1px solid #f6c7cb}
     .banner.warning{color:#825500;background:#fff8e7;border:1px solid #f8dfa5}
 
-    .grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px}
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(4,minmax(0,1fr));
+      gap:10px;
+    }
     .grid.list-view{grid-template-columns:1fr}
     .card{
       min-width:0;
-      min-height:184px;
-      padding:15px;
-      display:flex;flex-direction:column;justify-content:space-between;gap:12px;
-      border:1px solid #dce7f5;
-      border-radius:15px;
+      min-height:180px;
+      padding:15px 16px;
+      display:flex;
+      flex-direction:column;
+      justify-content:space-between;
+      gap:13px;
+      border:1px solid #dbe8f8;
+      border-radius:16px;
       background:#fff;
+      box-shadow:none;
       cursor:pointer;
-      transition:border-color .15s ease,box-shadow .15s ease,transform .15s ease
+      transition:border-color .16s ease,box-shadow .16s ease,transform .16s ease;
     }
-    .card:hover{border-color:#a9cafa;box-shadow:0 10px 24px rgba(37,99,235,.075);transform:translateY(-1px)}
-    .card.resigned{background:#fdfdfd}
+    .card:hover{
+      border-color:#a9cafa;
+      box-shadow:0 10px 24px rgba(37,99,235,.075);
+      transform:translateY(-1px);
+    }
+    .card.resigned{background:#fcfcfd}
     .card-main{display:flex;gap:12px}
     .avatar-wrap{
       width:48px;height:48px;flex:0 0 48px;
       position:relative;overflow:hidden;
-      border:1px solid #bfd7fb;
-      border-radius:14px;
-      background:#edf4ff
+      border:1px solid #bfd7fb;border-radius:14px;background:#edf4ff;
     }
     .avatar-photo{
       position:absolute;inset:0;width:100%;height:100%;
-      object-fit:cover;
-      background:#edf4ff
+      object-fit:cover;background:#edf4ff;
     }
     .avatar-fallback{
-      position:absolute;inset:0;
-      display:grid;place-items:center;
-      color:var(--blue);font-size:14px;font-weight:800
+      position:absolute;inset:0;display:grid;place-items:center;
+      color:#2563eb;font-size:14px;font-weight:800;
     }
     .avatar-wrap.has-photo .avatar-fallback{display:none}
     .staff-copy{min-width:0;flex:1}
-    .name-row{display:flex;align-items:flex-start;justify-content:space-between;gap:7px}
+    .name-row{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
     .name-row h2{
-      min-width:0;margin:0;
-      color:var(--ink);font-size:11px;font-weight:800;line-height:1.35
+      min-width:0;margin:0;color:#0f172a;
+      font-size:11.5px;line-height:1.36;font-weight:800
     }
-    .chips{max-width:145px;display:flex;align-items:flex-end;justify-content:flex-end;gap:4px;flex-wrap:wrap}
+    .chips{
+      max-width:150px;
+      display:flex;align-items:flex-end;justify-content:flex-end;
+      gap:4px;flex-wrap:wrap
+    }
     .chip{
-      max-width:145px;padding:3px 6px;
+      max-width:150px;padding:3px 6px;
       overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
-      border-radius:999px;font-size:6.7px;font-weight:800
+      border-radius:999px;font-size:6.8px;font-weight:800
     }
     .chip.department{color:#1d4ed8;background:#eff6ff;border:1px solid #bfdbfe}
-    .chip.active{color:var(--success);background:var(--success-bg);border:1px solid var(--success-line)}
-    .chip.resigned{color:var(--resigned);background:var(--resigned-bg);border:1px solid var(--resigned-line)}
-    .title{margin:4px 0 9px;color:#667085;font-size:8.6px;line-height:1.45}
-    .contact{margin-top:5px;display:flex;align-items:center;gap:6px;color:#667085;font-size:8px;line-height:1.4}
+    .chip.active{color:#059669;background:#ecfdf5;border:1px solid #a7f3d0}
+    .chip.resigned{color:#64748b;background:#f8fafc;border:1px solid #cbd5e1}
+    .title{margin:4px 0 8px;color:#64748b;font-size:8.8px;line-height:1.45}
+    .contact{margin-top:5px;display:flex;align-items:center;gap:6px;color:#64748b;font-size:8.2px;line-height:1.4}
     .contact svg{width:12px;height:12px;flex:0 0 12px;color:#6684b0}
-    .contact a{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#2563eb;text-decoration:none}
-    .actions{padding-top:10px;display:flex;align-items:center;gap:6px;border-top:1px solid #edf2f8}
+    .contact a{
+      min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+      color:#2563eb;text-decoration:none
+    }
+    .actions{
+      padding-top:10px;display:flex;align-items:center;gap:6px;
+      border-top:1px solid #edf2f8
+    }
     .action{
-      min-height:28px;padding:0 9px;
+      min-height:29px;padding:0 9px;
       border:1px solid #d5e4f7;border-radius:8px;
-      color:#315072;background:#fff;font-size:7px;font-weight:700
+      color:#315072;background:#fff;font-size:7.2px;font-weight:700
     }
     .open{
       margin-left:auto;width:29px;height:29px;
@@ -386,24 +639,23 @@
       color:#6380a6;background:#f4f8ff
     }
     .open svg{width:13px;height:13px}
-    .grid.list-view .card{min-height:92px;flex-direction:row;align-items:center}
+    .grid.list-view .card{min-height:94px;flex-direction:row;align-items:center}
     .grid.list-view .card-main{min-width:0;flex:1;align-items:center}
     .grid.list-view .actions{padding:0 0 0 11px;border-top:0;border-left:1px solid #edf2f8}
 
-    .empty{padding:68px 20px;text-align:center;color:var(--muted);font-size:10px}
-    .empty h2{margin:0 0 4px;color:var(--ink);font-size:14px}
+    .empty{padding:70px 20px;text-align:center;color:#64748b;font-size:10px}
+    .empty h2{margin:0 0 5px;color:#0f172a;font-size:14px}
 
-    /* PROFILE DRAWER ABOVE EVERYTHING */
+    /* PROFILE DRAWER: above navbar */
     .backdrop{
       position:fixed;inset:0;z-index:1000;
-      background:rgba(15,23,42,.18);
-      backdrop-filter:blur(2px)
+      background:rgba(15,23,42,.18);backdrop-filter:blur(2px)
     }
     .drawer{
       position:fixed;top:0;right:0;z-index:1010;
       width:min(420px,92vw);height:100vh;overflow-y:auto;
       transform:translateX(105%);
-      background:#fff;border-left:1px solid var(--line);
+      background:#fff;border-left:1px solid #dbeafe;
       box-shadow:-18px 0 50px rgba(15,23,42,.11);
       transition:transform .2s ease
     }
@@ -412,46 +664,44 @@
       position:sticky;top:0;z-index:5;
       min-height:62px;padding:12px 16px;
       display:flex;align-items:center;justify-content:space-between;
-      border-bottom:1px solid var(--line-soft);
-      background:#fff
+      border-bottom:1px solid #e8eef7;background:#fff
     }
-    .drawer-head span{color:var(--blue);font-size:9px;font-weight:800;letter-spacing:1.4px}
+    .drawer-head span{color:#2563eb;font-size:9px;font-weight:800;letter-spacing:1.4px}
     .close{
       width:38px;height:38px;display:grid;place-items:center;
-      border:1px solid var(--line);border-radius:11px;
+      border:1px solid #dbeafe;border-radius:11px;
       color:#5d6f8a;background:#fff
     }
-    .close:hover{color:var(--blue);background:#f8fbff}
+    .close:hover{color:#2563eb;background:#f8fbff}
     .close svg{width:17px;height:17px}
     .drawer-body{padding:0 20px 24px}
-    .drawer-profile{padding:22px 2px 25px;text-align:center;border-bottom:1px solid var(--line-soft)}
+    .drawer-profile{padding:22px 2px 25px;text-align:center;border-bottom:1px solid #e8eef7}
     .drawer-avatar{
       width:76px;height:76px;margin:0 auto 14px;
       position:relative;overflow:hidden;
       border:1px solid #bfd7fb;border-radius:21px;background:#edf4ff
     }
     .drawer-avatar img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-    .drawer-avatar span{position:absolute;inset:0;display:grid;place-items:center;color:var(--blue);font-size:19px;font-weight:800}
+    .drawer-avatar span{position:absolute;inset:0;display:grid;place-items:center;color:#2563eb;font-size:19px;font-weight:800}
     .drawer-avatar.has-photo span{display:none}
-    .drawer-profile h2{margin:0;font-size:18px;line-height:1.4;letter-spacing:-.35px}
-    .drawer-profile p{margin:4px 0 9px;color:var(--muted);font-size:9px}
+    .drawer-profile h2{margin:0;color:#0f172a;font-size:18px;line-height:1.4;letter-spacing:-.35px}
+    .drawer-profile p{margin:4px 0 9px;color:#64748b;font-size:9px}
     .drawer-chips{display:flex;justify-content:center;gap:5px;flex-wrap:wrap}
     .details{padding:16px 0}
     .detail{
-      padding:9px 2px;
-      display:grid;grid-template-columns:105px 1fr;gap:12px;
+      padding:9px 2px;display:grid;grid-template-columns:105px 1fr;gap:12px;
       border-bottom:1px solid #f0f4f8
     }
-    .detail span{color:var(--muted2);font-size:8px;font-weight:600}
-    .detail strong{min-width:0;color:#344054;font-size:8.7px;font-weight:650;word-break:break-word}
-    .detail a{color:var(--blue);text-decoration:none}
+    .detail span{color:#94a3b8;font-size:8px;font-weight:600}
+    .detail strong{min-width:0;color:#334155;font-size:8.7px;font-weight:650;word-break:break-word}
+    .detail a{color:#2563eb;text-decoration:none}
     .drawer-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:9px}
     .drawer-actions a,.drawer-actions button{
       min-height:41px;display:flex;align-items:center;justify-content:center;
       border-radius:11px;text-decoration:none;font-size:8.5px;font-weight:700
     }
-    .primary{border:0;color:#fff;background:var(--blue)}
-    .secondary{border:1px solid #bcd4fa;color:var(--blue);background:#fff}
+    .primary{border:0;color:#fff;background:#2563eb}
+    .secondary{border:1px solid #bcd4fa;color:#2563eb;background:#fff}
 
     .toast{
       position:fixed;left:50%;bottom:24px;z-index:1200;
@@ -462,11 +712,18 @@
     }
     .toast.show{transform:translate(-50%,0);opacity:1}
 
-    @media(max-width:1300px){
+    @media(max-width:1320px){
       .grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+      .login-story-panel{padding:40px 42px 16px}
+      .login-access-panel{margin:38px 28px 38px 0;padding:46px 34px 46px 56px;border-radius:116px 18px 18px 116px}
+      #loginScreen .login-title{font-size:34px}
+      #loginScreen .signin{min-height:60px;font-size:15px}
     }
-    @media(max-width:1050px){
-      .topbar-inner{grid-template-columns:1fr auto}
+    @media(max-width:1030px){
+      .topbar{width:calc(100% - 20px);margin-top:8px}
+      .topbar-inner{min-height:62px;padding:8px 10px}
+      .brand img{width:112px;height:36px;flex-basis:112px}
+      .brand-app-icon{width:34px;height:34px;flex-basis:34px}
       .nav-center{display:none}
       .toolbar{grid-template-columns:1fr 1fr 1fr}
       .search{grid-column:1/-1}
@@ -474,14 +731,29 @@
       .view-btn{flex:1}
       .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
     }
+    @media(max-width:980px){
+      #loginScreen{align-items:flex-start;justify-content:flex-start;padding:12px}
+      .login-shell{
+        min-height:0;
+        grid-template-columns:1fr;
+        grid-template-rows:auto auto auto;
+        grid-template-areas:"story" "access" "benefits";
+        border-radius:24px
+      }
+      .login-story-panel{padding:30px 30px 24px}
+      .login-hero-copy{margin-top:32px;max-width:760px}
+      .login-access-panel{margin:0 26px;padding:40px 34px;border-radius:30px}
+      #loginScreen .login-card{max-width:620px}
+      .login-benefit-band{padding:24px 26px 28px}
+    }
     @media(max-width:760px){
-      .topbar{padding:8px 10px 0}
-      .topbar-inner{min-height:56px;padding:7px 9px;border-radius:16px}
-      .brand img{width:118px;height:36px}
-      .brand-label,.divider{display:none}
+      .topbar-inner{gap:8px;padding:8px}
+      .brand img{width:92px;height:32px;flex-basis:92px}
+      .brand-app-icon{width:30px;height:30px;flex-basis:30px}
+      .divider{height:23px}
       .user-btn{min-width:40px;width:40px;padding:3px}
       .user-copy,.user-btn .chev{display:none}
-      .page-shell{padding:24px 12px 40px}
+      .page-shell{padding:22px 12px 40px}
       .hero{min-height:0;align-items:flex-start;flex-direction:column}
       .stats{width:100%}
       .stat{flex:1}
@@ -492,10 +764,27 @@
       .grid.list-view .card{align-items:stretch;flex-direction:column}
       .grid.list-view .actions{width:100%;padding:10px 0 0;border-left:0;border-top:1px solid #edf2f8}
     }
+    @media(max-width:680px){
+      #loginScreen{padding:8px}
+      .login-shell{border-radius:20px}
+      .login-story-panel{padding:24px 20px 22px}
+      .login-mranti-logo{width:122px;height:40px}
+      .login-brand-symbol{width:40px;height:40px;flex-basis:40px}
+      .login-brand-name{font-size:19px}
+      .login-brand-product{font-size:9px;letter-spacing:3px}
+      .login-hero-copy{margin-top:26px}
+      .login-hero-title{font-size:clamp(40px,12vw,54px);letter-spacing:-2px}
+      .login-hero-subtitle{margin-top:17px;font-size:13px}
+      .login-access-panel{margin:0 12px;padding:28px 20px;border-radius:22px}
+      #loginScreen .login-title{font-size:30px}
+      #loginScreen .login-sub{margin:14px 0 20px;font-size:13px}
+      #loginScreen .signin{min-height:55px;padding:12px 16px;font-size:14px}
+      .google-g{width:23px;height:23px;flex-basis:23px}
+      .login-trust-item{grid-template-columns:35px minmax(0,1fr);gap:10px;font-size:11.5px}
+      .login-trust-icon{width:35px;height:35px;padding:8px}
+      .login-benefit-band{grid-template-columns:1fr;padding:18px 12px 22px}
+    }
     @media(max-width:520px){
-      .login-screen{padding:14px}
-      .login-card{padding:27px 21px;border-radius:20px}
-      .login-card h1{font-size:30px}
       .hero h1{font-size:29px}
       .stats{flex-direction:column}
       .toolbar{grid-template-columns:1fr}
@@ -505,68 +794,118 @@
       .chips{align-items:flex-start;justify-content:flex-start}
       .drawer-actions{grid-template-columns:1fr}
     }
-    @media(max-width:520px){
-      .login-screen{padding:0}
-      .login-card{
-        width:calc(100vw - 40px);
-        margin-left:20px;
-        padding-top:88px;
-      }
-      .login-card h1{font-size:33px}
-      .login-card p{font-size:14px}
-      .signin{min-height:54px;font-size:13px}
-      .permission-row{grid-template-columns:38px 1fr;font-size:12px}
-      .permission-icon{width:38px;height:38px}
-    }
-
   </style>
 </head>
 
 <body>
-  <div id="loginScreen" class="login-screen">
-    <main class="login-card">
-      <h1>Welcome back</h1>
-      <p>Sign in with your MRANTI Google Workspace account to continue.</p>
-
-      <button id="signInButton" class="signin" type="button">
-        <svg class="google-g" viewBox="0 0 48 48" aria-hidden="true">
-          <path fill="#FFC107" d="M43.6 20H42V20H24v8h11.3C33.7 32.7 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.2 6.1 29.4 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.7-.4-4z"/>
-          <path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.2 18.9 12 24 12c3.1 0 5.9 1.2 8 3.1l5.7-5.7C34.2 6.1 29.4 4 24 4c-7.7 0-14.4 4.4-17.7 10.7z"/>
-          <path fill="#4CAF50" d="M24 44c5.2 0 10-2 13.5-5.2l-6.2-5.2C29.3 35.2 26.8 36 24 36c-5.3 0-9.7-3.3-11.3-7.9l-6.5 5C9.5 39.5 16.2 44 24 44z"/>
-          <path fill="#1976D2" d="M43.6 20H42V20H24v8h11.3c-.8 2.3-2.3 4.2-4.3 5.6l.1-.1 6.2 5.2C36.9 39.1 44 34 44 24c0-1.3-.1-2.7-.4-4z"/>
-        </svg>
-        <span>Continue with Google</span>
-      </button>
-
-      <div id="loginError" class="login-error"></div>
-
-      <div class="login-divider"></div>
-
-      <div class="login-permissions">
-        <div class="permission-row">
-          <span class="permission-icon shield" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><path d="M12 3 19 6v5c0 4.8-2.8 8.2-7 10-4.2-1.8-7-5.2-7-10V6l7-3Z"></path></svg>
-          </span>
-          <span>Authorised <strong>@mranti.my</strong> accounts only.</span>
+  <div id="loginScreen">
+    <main class="login-shell" aria-label="MRANTI Staff Directory sign in">
+      <section class="login-story-panel">
+        <div class="login-brand-row">
+          <div class="login-brand-lockup">
+            <img class="login-mranti-logo"
+              src="https://cdn.prod.website-files.com/6719e3902a71ea8154ba371d/6996a2c470a01e3f32ffa080_M30.png"
+              alt="MRANTI 30 Years" />
+            <span class="login-brand-divider" aria-hidden="true"></span>
+            <span class="login-brand-symbol" aria-hidden="true">
+              <svg viewBox="0 0 24 24">
+                <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                <circle cx="9" cy="7" r="4"></circle>
+                <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+              </svg>
+            </span>
+            <div class="login-brand-copy">
+              <div class="login-brand-name">Staff Directory</div>
+              <div class="login-brand-product">Workspace</div>
+            </div>
+          </div>
         </div>
 
-        <div class="permission-row">
-          <span class="permission-icon lock" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
-          </span>
-          <span>Access follows your organisation account and approved Workspace permissions.</span>
+        <div class="login-hero-copy">
+          <div class="login-eyebrow">MRANTI people directory</div>
+          <h1 class="login-hero-title">
+            <span>Find the right</span>
+            <span class="accent">person, faster.</span>
+          </h1>
+          <p class="login-hero-subtitle">
+            Search MRANTI colleagues by name, role, division, email or phone in one trusted internal directory.
+          </p>
         </div>
-      </div>
+      </section>
+
+      <section class="login-access-panel">
+        <div class="login-card">
+          <h2 class="login-title">Welcome back</h2>
+          <p class="login-sub">Sign in with your MRANTI Google Workspace account to continue.</p>
+
+          <div id="loginError" class="login-error" role="alert"></div>
+
+          <button id="signInButton" class="signin" type="button">
+            <svg class="google-g" viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="#4285F4" stroke="none" d="M21.6 12.23c0-.71-.06-1.39-.18-2.05H12v3.88h5.38a4.6 4.6 0 0 1-2 3.02v2.52h3.24c1.9-1.75 2.98-4.33 2.98-7.37Z"/>
+              <path fill="#34A853" stroke="none" d="M12 22c2.7 0 4.97-.9 6.62-2.4l-3.24-2.52c-.9.6-2.05.96-3.38.96-2.61 0-4.82-1.76-5.61-4.13H3.04v2.6A10 10 0 0 0 12 22Z"/>
+              <path fill="#FBBC05" stroke="none" d="M6.39 13.91A6 6 0 0 1 6.08 12c0-.66.11-1.3.31-1.91v-2.6H3.04A10 10 0 0 0 2 12c0 1.62.39 3.15 1.04 4.51l3.35-2.6Z"/>
+              <path fill="#EA4335" stroke="none" d="M12 5.96c1.47 0 2.79.5 3.83 1.5l2.87-2.87A9.63 9.63 0 0 0 12 2a10 10 0 0 0-8.96 5.49l3.35 2.6C7.18 7.72 9.39 5.96 12 5.96Z"/>
+            </svg>
+            <span>Continue with Google</span>
+          </button>
+
+          <div class="login-card-divider"></div>
+
+          <div class="login-trust-list">
+            <div class="login-trust-item">
+              <span class="login-trust-icon shield">
+                <svg viewBox="0 0 24 24"><path d="M12 3 5 6v5.2c0 4.4 2.8 7.6 7 9.3 4.2-1.7 7-4.9 7-9.3V6l-7-3Z"></path></svg>
+              </span>
+              <span>Authorised <strong>@mranti.my</strong> accounts only.</span>
+            </div>
+            <div class="login-trust-item">
+              <span class="login-trust-icon lock">
+                <svg viewBox="0 0 24 24"><rect x="5" y="10" width="14" height="10" rx="2"></rect><path d="M8 10V7a4 4 0 0 1 8 0v3"></path></svg>
+              </span>
+              <span>Access follows your organisation account and approved Workspace permissions.</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="login-benefit-band" aria-label="Staff Directory benefits">
+        <div class="login-benefit-card">
+          <span class="login-benefit-icon"><svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg></span>
+          <strong>Find colleagues quickly</strong>
+          <span>Search across people, roles, divisions and contact details.</span>
+        </div>
+        <div class="login-benefit-card">
+          <span class="login-benefit-icon"><svg viewBox="0 0 24 24"><path d="M4 21V9l8-5 8 5v12"></path><path d="M9 21v-6h6v6"></path></svg></span>
+          <strong>Trusted division context</strong>
+          <span>Uses MRANTI's approved 16-division grouping.</span>
+        </div>
+        <div class="login-benefit-card">
+          <span class="login-benefit-icon"><svg viewBox="0 0 24 24"><path d="M4 4h16v16H4z"></path><path d="m4 7 8 6 8-6"></path></svg></span>
+          <strong>Contact directly</strong>
+          <span>Email or copy contact details from the staff profile.</span>
+        </div>
+      </section>
     </main>
   </div>
 
   <div id="appScreen" hidden>
     <header class="topbar">
       <div class="topbar-inner">
-        <div class="brand">
-          <img src="https://cdn.prod.website-files.com/6719e3902a71ea8154ba371d/6996a2c470a01e3f32ffa080_M30.png" alt="MRANTI 30 Years" />
-          <span class="divider"></span>
-          <span class="brand-label">STAFF DIRECTORY</span>
+        <div class="brand" aria-label="MRANTI Staff Directory">
+          <img
+            src="https://cdn.prod.website-files.com/6719e3902a71ea8154ba371d/6996a2c470a01e3f32ffa080_M30.png"
+            alt="MRANTI 30 Years" />
+          <span class="divider" aria-hidden="true"></span>
+          <span class="brand-app-icon" aria-label="Staff Directory application">
+            <svg viewBox="0 0 24 24">
+              <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+          </span>
         </div>
 
         <nav class="nav-center" aria-label="Staff Directory navigation">
@@ -690,7 +1029,7 @@
   <script>
     const API_URL = 'https://mrantidata.app.n8n.cloud/webhook/staff-directory-data';
     const ALLOWED_DOMAIN = 'mranti.my';
-    const CACHE_KEY = 'mranti_staff_directory_cache_v6';
+    const CACHE_KEY = 'mranti_staff_directory_cache_v7';
 
     const FIREBASE_CONFIG = {
       apiKey: 'AIzaSyDXz0gL67r9BafTg8nL6VdHYdw1tfcxhto',
@@ -771,7 +1110,7 @@
               alt="${esc(user.fullName)}"
               referrerpolicy="no-referrer"
               onload="this.parentElement.classList.add('has-photo')"
-              onerror="this.remove()"
+              onerror="this.style.display='none';this.parentElement.classList.remove('has-photo')"
             />
           </div>`;
       }
@@ -786,7 +1125,7 @@
             loading="lazy"
             referrerpolicy="no-referrer"
             onload="this.parentElement.classList.add('has-photo')"
-            onerror="this.remove()"
+            onerror="this.style.display='none';this.parentElement.classList.remove('has-photo')"
           />
         </div>`;
     }
