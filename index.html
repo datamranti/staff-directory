@@ -6,11 +6,11 @@
   <meta name="theme-color" content="#f5f9ff" />
   <title>MRANTI Staff Directory</title>
 
-  <link rel="icon" type="image/png" sizes="512x512" href="./public/favicon-512.png?v=17" />
-  <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32.png?v=17" />
-  <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16.png?v=17" />
-  <link rel="shortcut icon" href="./public/favicon.ico?v=17" />
-  <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png?v=17" />
+  <link rel="icon" type="image/png" sizes="512x512" href="./public/favicon-512.png?v=18" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32.png?v=18" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16.png?v=18" />
+  <link rel="shortcut icon" href="./public/favicon.ico?v=18" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png?v=18" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -1335,7 +1335,7 @@
   <script>
     const API_URL = 'https://mrantidata.app.n8n.cloud/webhook/staff-directory-data';
     const ALLOWED_DOMAIN = 'mranti.my';
-    const CACHE_KEY = 'mranti_staff_directory_cache_v17';
+    const CACHE_KEY = 'mranti_staff_directory_cache_v18';
 
     const FIREBASE_CONFIG = {
       apiKey: 'AIzaSyDXz0gL67r9BafTg8nL6VdHYdw1tfcxhto',
@@ -1678,7 +1678,12 @@
       const email = user.primaryEmail
         ? `<div class="contact">
              <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg>
-             <a href="mailto:${esc(user.primaryEmail)}" onclick="event.stopPropagation()">${esc(user.primaryEmail)}</a>
+             <a
+               href="https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(user.primaryEmail)}"
+               target="_blank"
+               rel="noopener noreferrer"
+               onclick="event.stopPropagation()"
+             >${esc(user.primaryEmail)}</a>
            </div>`
         : '';
 
@@ -1970,7 +1975,7 @@
               <span>${esc(label)}</span>
               <strong>
                 ${type === 'email'
-                  ? `<a href="mailto:${esc(value)}">${esc(value)}</a>`
+                  ? `<a href="https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(value)}" target="_blank" rel="noopener noreferrer">${esc(value)}</a>`
                   : esc(value)}
               </strong>
             </div>
@@ -1978,14 +1983,26 @@
         </div>
 
         <div class="drawer-actions">
-          <a class="primary" href="mailto:${esc(user.primaryEmail)}">Email ${esc(user.givenName || (user.fullName || 'Staff').split(' ')[0])}</a>
+          <button class="primary" type="button" id="drawerEmail">Email ${esc(user.givenName || (user.fullName || 'Staff').split(' ')[0])}</button>
           <button class="secondary" type="button" id="drawerCopy">Copy email</button>
         </div>`;
 
+      $('drawerEmail')?.addEventListener('click', () => openGmailCompose(user.primaryEmail));
       $('drawerCopy')?.addEventListener('click', () => copyEmail(user.primaryEmail));
       $('drawerBackdrop').hidden = false;
       $('staffDrawer').classList.add('open');
       $('staffDrawer').setAttribute('aria-hidden', 'false');
+    }
+
+    function openGmailCompose(email) {
+      const cleanEmail = String(email || '').trim();
+      if (!cleanEmail) return;
+
+      const gmailUrl =
+        'https://mail.google.com/mail/?view=cm&fs=1&to=' +
+        encodeURIComponent(cleanEmail);
+
+      window.open(gmailUrl, '_blank', 'noopener,noreferrer');
     }
 
     async function copyEmail(email) {
@@ -2095,7 +2112,7 @@
         const email = action.dataset.email || '';
 
         if (action.dataset.action === 'copy') copyEmail(email);
-        if (action.dataset.action === 'email') window.location.href = `mailto:${email}`;
+        if (action.dataset.action === 'email') openGmailCompose(email);
         return;
       }
 
