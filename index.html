@@ -6,11 +6,11 @@
   <meta name="theme-color" content="#f5f9ff" />
   <title>MRANTI Staff Directory</title>
 
-  <link rel="icon" type="image/png" sizes="512x512" href="./public/favicon-512.png?v=10" />
-  <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32.png?v=10" />
-  <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16.png?v=10" />
-  <link rel="shortcut icon" href="./public/favicon.ico?v=10" />
-  <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png?v=10" />
+  <link rel="icon" type="image/png" sizes="512x512" href="./public/favicon-512.png?v=11" />
+  <link rel="icon" type="image/png" sizes="32x32" href="./public/favicon-32.png?v=11" />
+  <link rel="icon" type="image/png" sizes="16x16" href="./public/favicon-16.png?v=11" />
+  <link rel="shortcut icon" href="./public/favicon.ico?v=11" />
+  <link rel="apple-touch-icon" sizes="180x180" href="./public/apple-touch-icon.png?v=11" />
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -765,8 +765,8 @@
     }
     .close:hover{color:#2563eb;background:#f8fbff}
     .close svg{width:17px;height:17px}
-    .drawer-body{padding:0 20px 24px}
-    .drawer-profile{padding:22px 2px 25px;text-align:center;border-bottom:1px solid #e8eef7}
+    .drawer-body{display:block!important;min-height:0!important;padding:0 20px 24px!important}
+    .drawer-profile{min-height:0!important;margin:0!important;padding:20px 2px 22px!important;text-align:center;border-bottom:1px solid #e8eef7}
     .drawer-avatar{
       width:76px;height:76px;margin:0 auto 14px;
       position:relative;overflow:hidden;
@@ -1119,8 +1119,9 @@
 
   <script>
     const API_URL = 'https://mrantidata.app.n8n.cloud/webhook/staff-directory-data';
+    const PHOTO_API_URL = 'https://mrantidata.app.n8n.cloud/webhook/staff-directory-photo';
     const ALLOWED_DOMAIN = 'mranti.my';
-    const CACHE_KEY = 'mranti_staff_directory_cache_v10';
+    const CACHE_KEY = 'mranti_staff_directory_cache_v11';
 
     const FIREBASE_CONFIG = {
       apiKey: 'AIzaSyDXz0gL67r9BafTg8nL6VdHYdw1tfcxhto',
@@ -1156,6 +1157,8 @@
     let currentView = 'grid';
     let refreshInProgress = false;
     let currentAuthUser = null;
+    let photoObserver = null;
+    const photoCache = new Map();
 
     const filterState = {
       division: '',
@@ -1212,36 +1215,27 @@
     }
 
     function avatarMarkup(user, drawer = false) {
-      const photo = String(user.thumbnailPhotoUrl || '').trim();
+      const email = String(user.primaryEmail || '').trim();
+      const canLoadPhoto = Boolean(email && user.photoAvailable !== false);
 
       if (drawer) {
         return `
-          <div class="drawer-avatar">
+          <div
+            class="drawer-avatar"
+            ${canLoadPhoto ? `data-photo-email="${esc(email)}"` : ''}
+          >
             <span class="drawer-avatar-fallback">${genericAvatarIcon()}</span>
-            ${photo ? `
-              <img
-                src="${esc(photo)}"
-                alt="${esc(user.fullName)}"
-                referrerpolicy="no-referrer"
-                onload="this.parentElement.classList.add('has-photo')"
-                onerror="this.style.display='none';this.parentElement.classList.remove('has-photo')"
-              />` : ''}
+            <img class="drawer-photo" alt="${esc(user.fullName)}" referrerpolicy="no-referrer" />
           </div>`;
       }
 
       return `
-        <div class="avatar-wrap">
+        <div
+          class="avatar-wrap"
+          ${canLoadPhoto ? `data-photo-email="${esc(email)}"` : ''}
+        >
           <span class="avatar-fallback">${genericAvatarIcon()}</span>
-          ${photo ? `
-            <img
-              class="avatar-photo"
-              src="${esc(photo)}"
-              alt="${esc(user.fullName)}"
-              loading="lazy"
-              referrerpolicy="no-referrer"
-              onload="this.parentElement.classList.add('has-photo')"
-              onerror="this.style.display='none';this.parentElement.classList.remove('has-photo')"
-            />` : ''}
+          <img class="avatar-photo" alt="${esc(user.fullName)}" loading="lazy" referrerpolicy="no-referrer" />
         </div>`;
     }
 
@@ -1488,6 +1482,8 @@
       $('resultCount').textContent = `${filtered.length} ${filtered.length === 1 ? 'person' : 'people'}`;
       $('emptyState').hidden = filtered.length > 0;
       $('staffGrid').hidden = filtered.length === 0;
+
+      activatePhotoObserver();
     }
 
     function setSignedInAvatar(photoUrl, fallbackName = '') {
@@ -1510,33 +1506,126 @@
         shell.classList.remove('has-photo');
       };
 
-      // Force a clean reload when switching between Firebase and Directory photos.
       shell.classList.remove('has-photo');
       photo.src = cleanUrl;
     }
 
-    function syncSignedInAvatarFromDirectory() {
+    async function fetchWorkspacePhoto(email) {
+      const key = String(email || '').trim().toLowerCase();
+      if (!key) return '';
+
+      if (photoCache.has(key)) {
+        return await photoCache.get(key);
+      }
+
+      const request = (async () => {
+        try {
+          const authUser = firebase.auth().currentUser;
+          if (!authUser) return '';
+
+          const idToken = await authUser.getIdToken(false);
+
+          const response = await fetch(PHOTO_API_URL, {
+            method: 'POST',
+            cache: 'no-store',
+            headers: { 'Content-Type': 'text/plain;charset=UTF-8' },
+            body: JSON.stringify({
+              idToken,
+              email: key,
+              requestedAt: new Date().toISOString()
+            })
+          });
+
+          const body = await response.text();
+          let data;
+
+          try {
+            data = JSON.parse(body);
+          } catch {
+            return '';
+          }
+
+          if (!response.ok || data.success === false || !data.hasPhoto) {
+            return '';
+          }
+
+          return String(data.dataUrl || '').trim();
+        } catch {
+          return '';
+        }
+      })();
+
+      photoCache.set(key, request);
+      return await request;
+    }
+
+    async function hydratePhotoElement(element) {
+      if (!element || element.dataset.photoHydrated === '1') return;
+
+      const email = String(element.dataset.photoEmail || '').trim().toLowerCase();
+      if (!email) return;
+
+      element.dataset.photoHydrated = '1';
+
+      const dataUrl = await fetchWorkspacePhoto(email);
+      if (!dataUrl) return;
+
+      const img = element.querySelector('img');
+      if (!img) return;
+
+      img.onload = () => element.classList.add('has-photo');
+      img.onerror = () => {
+        img.removeAttribute('src');
+        element.classList.remove('has-photo');
+      };
+      img.src = dataUrl;
+    }
+
+    function activatePhotoObserver() {
+      if (photoObserver) {
+        photoObserver.disconnect();
+      }
+
+      const candidates = [...document.querySelectorAll('.avatar-wrap[data-photo-email]')];
+
+      if (!('IntersectionObserver' in window)) {
+        candidates.forEach(hydratePhotoElement);
+        return;
+      }
+
+      photoObserver = new IntersectionObserver(entries => {
+        entries.forEach(entry => {
+          if (!entry.isIntersecting) return;
+          photoObserver.unobserve(entry.target);
+          hydratePhotoElement(entry.target);
+        });
+      }, {
+        rootMargin: '160px 0px',
+        threshold: 0.01
+      });
+
+      candidates.forEach(element => photoObserver.observe(element));
+    }
+
+    async function syncSignedInAvatarFromWorkspace() {
       const authEmail = String(currentAuthUser?.email || '').trim().toLowerCase();
       if (!authEmail) return;
 
-      const ownRecord = allUsers.find(user =>
-        String(user.primaryEmail || '').trim().toLowerCase() === authEmail
-      );
+      // Preferred: actual Google Workspace Directory photo through n8n.
+      const workspacePhoto = await fetchWorkspacePhoto(authEmail);
 
-      // Workspace Directory photo is the preferred source.
-      // Firebase/Google Auth photo remains the fallback if Directory has no thumbnail.
-      const workspacePhoto = String(ownRecord?.thumbnailPhotoUrl || '').trim();
-      const authPhoto = String(currentAuthUser?.photoURL || '').trim();
+      // Fallback only if Workspace genuinely has no photo.
+      const fallbackPhoto = String(currentAuthUser?.photoURL || '').trim();
 
       setSignedInAvatar(
-        workspacePhoto || authPhoto,
-        ownRecord?.fullName || currentAuthUser?.displayName || currentAuthUser?.email
+        workspacePhoto || fallbackPhoto,
+        currentAuthUser?.displayName || currentAuthUser?.email || 'MRANTI Staff'
       );
     }
 
     function setData(data) {
       allUsers = Array.isArray(data?.users) ? data.users.slice() : [];
-      syncSignedInAvatarFromDirectory();
+      syncSignedInAvatarFromWorkspace();
 
       $('activeCount').textContent =
         Number.isFinite(Number(data?.activeUsers))
@@ -1641,8 +1730,7 @@
         ['Email', user.primaryEmail, 'email'],
         ['Phone', user.phoneNumbers],
         ['Division', user.department],
-        ['Organisation unit', user.organisationUnit],
-        ['Source department', user.rawDepartment]
+        ['Organisation unit', user.organisationUnit]
       ].filter(([,value]) => String(value || '').trim());
 
       $('drawerContent').innerHTML = `
@@ -1672,6 +1760,10 @@
         </div>`;
 
       $('drawerCopy')?.addEventListener('click', () => copyEmail(user.primaryEmail));
+
+      const drawerAvatar = $('drawerContent').querySelector('.drawer-avatar[data-photo-email]');
+      if (drawerAvatar) hydratePhotoElement(drawerAvatar);
+
       $('drawerBackdrop').hidden = false;
       $('staffDrawer').classList.add('open');
       $('staffDrawer').setAttribute('aria-hidden', 'false');
@@ -1720,12 +1812,13 @@
       $('menuName').textContent = user.displayName || 'MRANTI Staff';
       $('menuEmail').textContent = user.email || '';
 
-      // Show the Google sign-in profile image immediately.
-      // Once directory data arrives, the Workspace Directory thumbnail becomes the source of truth.
+      // Temporary sign-in fallback while Workspace photo is fetched.
       setSignedInAvatar(
         user.photoURL || '',
         user.displayName || user.email || 'MRANTI Staff'
       );
+
+      syncSignedInAvatarFromWorkspace();
     }
 
     function validDomain(user) {
