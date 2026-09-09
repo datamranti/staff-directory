@@ -744,7 +744,24 @@
       box-shadow:0 10px 24px rgba(37,99,235,.075);
       transform:translateY(-1px);
     }
-    .card.resigned{background:#fcfcfd}
+    .card.resigned{
+      background:#f8fafc;
+      border-color:#d8e0ea;
+      cursor:default;
+    }
+    .card.resigned:hover{
+      border-color:#d8e0ea;
+      box-shadow:none;
+      transform:none;
+    }
+    .card.resigned .card-main{
+      opacity:.72;
+    }
+    .card.resigned .contact a,
+    .card.resigned .disabled-contact{
+      color:#94a3b8;
+      text-decoration:none;
+    }
     .card-main{display:flex;gap:12px}
     .avatar-wrap{
       width:48px;height:48px;flex:0 0 48px;
@@ -801,6 +818,14 @@
       min-height:29px;padding:0 9px;
       border:1px solid #d5e4f7;border-radius:8px;
       color:#315072;background:#fff;font-size:7.2px;font-weight:700
+    }
+    .action:disabled,
+    .open:disabled{
+      cursor:not-allowed;
+      color:#94a3b8;
+      background:#f1f5f9;
+      border-color:#e2e8f0;
+      opacity:.72;
     }
     .open{
       margin-left:auto;width:29px;height:29px;
