@@ -19,7 +19,7 @@
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
 
-    <link rel="stylesheet" href="./src/styles.css?v=26" />
+    <link rel="stylesheet" href="./src/styles.css?v=27" />
 </head>
 
 <body>
@@ -256,7 +256,7 @@
   <script>
     const API_URL = 'https://mrantidata.app.n8n.cloud/webhook/staff-directory-data';
     const ALLOWED_DOMAIN = 'mranti.my';
-    const CACHE_KEY = 'mranti_staff_directory_cache_v26';
+    const CACHE_KEY = 'mranti_staff_directory_cache_v27';
 
     const FIREBASE_CONFIG = {
       apiKey: 'AIzaSyDXz0gL67r9BafTg8nL6VdHYdw1tfcxhto',
@@ -513,13 +513,17 @@
     }
 
     function card(user) {
+      const isResigned = user.status === 'Resigned';
+
       const email = user.primaryEmail
         ? `<div class="contact">
              <svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg>
-             <a
-               href="#"
-               onclick="event.preventDefault();event.stopPropagation();openGmailCompose('${esc(user.primaryEmail)}')"
-             >${esc(user.primaryEmail)}</a>
+             ${isResigned
+               ? `<span class="disabled-contact">${esc(user.primaryEmail)}</span>`
+               : `<a
+                    href="#"
+                    onclick="event.preventDefault();event.stopPropagation();openGmailCompose('${esc(user.primaryEmail)}')"
+                  >${esc(user.primaryEmail)}</a>`}
            </div>`
         : '';
 
@@ -531,7 +535,12 @@
         : '';
 
       return `
-        <article class="card ${user.status === 'Resigned' ? 'resigned' : ''}" data-id="${esc(user.id || user.primaryEmail)}">
+        <article
+          class="card ${isResigned ? 'resigned' : ''}"
+          data-id="${esc(user.id || user.primaryEmail)}"
+          data-status="${esc(user.status || '')}"
+          ${isResigned ? 'aria-disabled="true"' : ''}
+        >
           <div class="card-main">
             ${avatarMarkup(user)}
             <div class="staff-copy">
@@ -546,9 +555,28 @@
           </div>
 
           <div class="actions">
-            <button class="action" type="button" data-action="email" data-email="${esc(user.primaryEmail)}">Email</button>
-            <button class="action" type="button" data-action="copy" data-email="${esc(user.primaryEmail)}">Copy email</button>
-            <button class="open" type="button" aria-label="Open profile">
+            <button
+              class="action"
+              type="button"
+              data-action="email"
+              data-email="${esc(user.primaryEmail)}"
+              ${isResigned ? 'disabled aria-disabled="true" title="Disabled for resigned staff"' : ''}
+            >Email</button>
+
+            <button
+              class="action"
+              type="button"
+              data-action="copy"
+              data-email="${esc(user.primaryEmail)}"
+              ${isResigned ? 'disabled aria-disabled="true" title="Disabled for resigned staff"' : ''}
+            >Copy email</button>
+
+            <button
+              class="open"
+              type="button"
+              aria-label="${isResigned ? 'Profile disabled for resigned staff' : 'Open profile'}"
+              ${isResigned ? 'disabled aria-disabled="true" title="Disabled for resigned staff"' : ''}
+            >
               <svg viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"></path></svg>
             </button>
           </div>
@@ -786,6 +814,7 @@
 
     function openDrawer(user) {
       if (!user) return;
+      if (user.status === 'Resigned') return;
 
       const rows = [
         ['Status', user.status],
@@ -966,6 +995,15 @@
     $('listViewButton').addEventListener('click', () => setView('list'));
 
     $('staffGrid').addEventListener('click', event => {
+      const cardEl = event.target.closest('[data-id]');
+
+      // Resigned records are intentionally view-only.
+      if (cardEl?.dataset.status === 'Resigned') {
+        event.preventDefault();
+        event.stopPropagation();
+        return;
+      }
+
       const action = event.target.closest('[data-action]');
 
       if (action) {
@@ -977,7 +1015,6 @@
         return;
       }
 
-      const cardEl = event.target.closest('[data-id]');
       if (!cardEl) return;
 
       const id = cardEl.dataset.id;
